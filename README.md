@@ -1,6 +1,6 @@
 # erikwang2013/hashids
 
-PHP 多框架 Hashids 集成：**Laravel**、**Webman**、**ThinkPHP**、**Hyperf**。配置与用法对齐 [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids)（多连接、默认连接、`HashidsManager` + 工厂）。
+PHP 多框架 Hashids 集成：**Laravel**、**Webman**、**ThinkPHP**、**Hyperf**。参考来源、配置与用法对齐 [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids)（多连接、默认连接、`HashidsManager` + 工厂）。
 
 底层依赖：[`hashids/hashids`](https://github.com/vinkla/hashids) v5。
 
