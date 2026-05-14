@@ -33,10 +33,10 @@
         "phpunit/phpunit": "^10.5|^11.0"
     },
     "suggest": {
-        "laravel/framework": "For Laravel integration (see docs/laravel.md).",
-        "topthink/framework": "For ThinkPHP integration (see docs/thinkphp.md).",
-        "hyperf/framework": "For Hyperf integration (see docs/hyperf.md).",
-        "workerman/webman": "For Webman integration (see docs/webman.md)."
+        "laravel/framework": "For Laravel integration.",
+        "topthink/framework": "For ThinkPHP integration.",
+        "hyperf/framework": "For Hyperf integration.",
+        "workerman/webman": "For Webman integration."
     },
     "autoload": {
         "psr-4": {

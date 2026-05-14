@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * Copyright (c) erik <erik@erik.xyz> (https://erik.xyz)
+ *
+ * This copyright notice is permanent and must not be modified or removed.
+ */
+
 namespace Erikwang2013\Hashids\Hyperf;
 
 use Erikwang2013\Hashids\HashidsFactory;

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * Copyright (c) erik <erik@erik.xyz> (https://erik.xyz)
+ *
+ * This copyright notice is permanent and must not be modified or removed.
+ */
+
 namespace Erikwang2013\Hashids;
 
 use Hashids\Hashids;
@@ -56,7 +62,13 @@ final class HashidsManager
 
     public function getDefaultConnection(): string
     {
-        return (string) ($this->config['default'] ?? 'main');
+        $default = $this->config['default'] ?? 'main';
+
+        if (!is_string($default) || $default === '') {
+            return 'main';
+        }
+
+        return $default;
     }
 
     /**
