@@ -4,6 +4,34 @@ PHP 多框架 Hashids 集成：**Laravel**、**Webman**、**ThinkPHP**、**Hyper
 
 底层依赖：[`hashids/hashids`](https://github.com/vinkla/hashids) v5。
 
+## 项目说明
+
+**Hashids** 是一款短 ID 生成器，可将数字 ID（如数据库主键）编码为短小、唯一且不可猜测的字符串。它不同于 UUID 或雪花 ID——Hashids 更适合用于面向用户的场景（URL、分享码、订单号等），在保持短小可读的同时隐藏原始数字。
+
+本包 `erikwang2013/hashids` 是 Hashids 的 **PHP 多框架集成层**，在设计上参考并对齐了 [vinkla/hashids](https://github.com/vinkla/laravel-hashids) 的 API 风格（多连接、默认连接、Manager + Factory 模式），并扩展支持了国内常用的其他 PHP 框架。
+
+**核心特性：**
+
+- **多框架兼容**：同一套 API 同时支持 Laravel、Webman、ThinkPHP、Hyperf，迁移成本极低。
+- **多连接支持**：一个应用可同时配置多套 Salt/Length 组合（如用户 ID 与订单 ID 使用不同盐值），通过 `connection('xxx')` 切换。
+- **无框架依赖**：不依赖任何特定框架即可独立使用，直接 `new HashidsManager($config, $factory)` 即可工作。
+- **对齐 vinkla/hashids**：Laravel 下 Facade、容器绑定、`config/hashids.php` 格式均与 vinkla/hashids 一致，可平滑替换。
+- **框架原生风格**：各框架集成遵循各自的惯用法——Laravel 用 ServiceProvider + Facade，Webman 用 Plugin + Bootstrap，ThinkPHP 用 Service，Hyperf 用 ConfigProvider。
+
+**适用场景：**
+
+| 场景 | 说明 |
+|------|------|
+| 隐藏数据库自增 ID | 将 `user_id=100` 映射为 `/user/3kTMd`，避免暴露业务规模 |
+| 生成短链接/分享码 | 比 UUID 更短，比随机字符串可控 |
+| 订单号/流水号 | 可读性好，便于客服沟通与日志排查 |
+| 多租户/多模块隔离 | 不同连接使用不同 Salt，确保编码空间相互独立 |
+
+**注意事项：**
+
+- Hashids 是 **编码（encode/decode）而非加密**。Salt 仅增加猜测难度，不可用于安全敏感场景（如 token、密码）。
+- 一旦上线后修改 Salt 或 Length，所有已编码的 ID 将变为无效，请提前规划并固定配置。
+
 ## 安装
 
 ```bash
