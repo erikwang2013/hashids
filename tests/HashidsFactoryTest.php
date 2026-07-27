@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Erikwang2013\Hashids\Tests;
 
 use Erikwang2013\Hashids\HashidsFactory;
-use hashids\Hashids;
 use PHPUnit\Framework\TestCase;
 
 final class HashidsFactoryTest extends TestCase
