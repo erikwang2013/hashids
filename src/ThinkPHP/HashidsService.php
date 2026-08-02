@@ -19,7 +19,9 @@ final class HashidsService extends ThinkService
 {
     public function register(): void
     {
-        $this->app->bind(HashidsFactory::class, static fn (): HashidsFactory => new HashidsFactory());
+        // HashidsFactory is stateless — class-name binding lets the container
+        // resolve and share a single instance (matching Laravel's singleton).
+        $this->app->bind(HashidsFactory::class, HashidsFactory::class);
 
         $this->app->bind(HashidsManager::class, function (): HashidsManager {
             $cfg = $this->app->config->get('hashids');

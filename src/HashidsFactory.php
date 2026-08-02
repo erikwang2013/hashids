@@ -17,6 +17,9 @@ final class HashidsFactory
     /**
      * Build a Hashids instance from a connection config array.
      *
+     * Alphabet validation (duplicate chars, min length, etc.) is delegated to
+     * hashids/hashids which provides clear exception messages.
+     *
      * @param array{salt?: string|mixed, length?: int|string|mixed, alphabet?: string|mixed} $config
      */
     public function make(array $config): Hashids
@@ -24,7 +27,7 @@ final class HashidsFactory
         $salt = (string) ($config['salt'] ?? '');
         $length = (int) ($config['length'] ?? 0);
 
-        if (isset($config['alphabet']) && $config['alphabet'] !== '' && $config['alphabet'] !== null) {
+        if (isset($config['alphabet']) && $config['alphabet'] !== '') {
             return new Hashids($salt, $length, (string) $config['alphabet']);
         }
 

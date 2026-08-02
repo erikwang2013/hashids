@@ -60,6 +60,12 @@ final class HashidsManager
         return $this->connections[$name];
     }
 
+    /**
+     * Returns the configured default connection name, falling back to 'main'
+     * when the value is missing, empty, or non-string. The silent fallback
+     * matches vinkla/hashids API contract — callers should validate config
+     * at deploy time rather than rely on runtime warnings here.
+     */
     public function getDefaultConnection(): string
     {
         $default = $this->config['default'] ?? 'main';

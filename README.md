@@ -314,11 +314,15 @@ Hyperf 使用 **`config/autoload/hashids.php`** 且配置套在 **`hashids`** �
 
 ---
 
-## 开源不易，欢迎支持
+## 开源不易，欢迎支持 / Open Source is Not Easy, Your Support is Welcome
 
-| 微信 | 支付宝 |
-|:---:|:---:|
-| ![微信](./docs/weixinpay.png "微信") | ![支付宝](./docs/alipay.png "支付宝") |
+<p align="center">
+  <img src="./docs/weixinpay.png" alt="微信 WeChat Pay" width="130" height="130" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./docs/alipay.png" alt="支付宝 Alipay" width="130" height="130" />
+</p>
+
+<p align="center"><strong>微信 WeChat Pay</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>支付宝 Alipay</strong></p>
 
 ---
 
