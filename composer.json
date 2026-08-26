@@ -64,9 +64,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
-        "sort-packages": true,
-        "platform": {
-            "php": "8.0"
-        }
+        "sort-packages": true
     }
 }
