@@ -147,4 +147,74 @@ final class HashidsManagerTest extends TestCase
         $b = $manager->connection('main');
         self::assertSame($a, $b);
     }
+
+    public function test_get_factory_returns_the_injected_factory(): void
+    {
+        $factory = new HashidsFactory();
+        $manager = new HashidsManager([], $factory);
+
+        self::assertSame($factory, $manager->getFactory());
+    }
+
+    public function test_connection_with_non_array_config_throws(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'main',
+            'connections' => [
+                'main' => 'not-an-array',
+            ],
+        ], new HashidsFactory());
+
+        $this->expectException(InvalidArgumentException::class);
+        $manager->connection('main');
+    }
+
+    public function test_magic_call_forwards_hex_methods(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'main',
+            'connections' => [
+                'main' => ['salt' => 'hex-magic', 'length' => 6],
+            ],
+        ], new HashidsFactory());
+
+        $hash = $manager->encodeHex('c0ffee');
+
+        self::assertIsString($hash);
+        self::assertSame('c0ffee', $manager->decodeHex($hash));
+    }
+
+    public function test_connection_with_unconfigured_default_throws(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'missing',
+            'connections' => [
+                'main' => ['salt' => 'x', 'length' => 4],
+            ],
+        ], new HashidsFactory());
+
+        $this->expectException(InvalidArgumentException::class);
+        $manager->connection();
+    }
+
+    public function test_connection_throws_when_no_connections_configured(): void
+    {
+        $manager = new HashidsManager([], new HashidsFactory());
+
+        $this->expectException(InvalidArgumentException::class);
+        $manager->connection();
+    }
+
+    public function test_magic_call_to_undefined_method_throws_error(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'main',
+            'connections' => [
+                'main' => ['salt' => 'x', 'length' => 4],
+            ],
+        ], new HashidsFactory());
+
+        $this->expectException(\Error::class);
+        $manager->thisMethodDoesNotExist(1, 2);
+    }
 }
