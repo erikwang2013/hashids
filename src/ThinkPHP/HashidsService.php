@@ -23,11 +23,10 @@ final class HashidsService extends ThinkService
         // resolve and share a single instance (matching Laravel's singleton).
         $this->app->bind(HashidsFactory::class, HashidsFactory::class);
 
-        $this->app->bind(HashidsManager::class, function (): HashidsManager {
-            $cfg = $this->app->config->get('hashids');
-
-            return new HashidsManager(is_array($cfg) ? $cfg : [], $this->app->make(HashidsFactory::class));
-        });
+        $this->app->bind(HashidsManager::class, fn (): HashidsManager => new HashidsManager(
+            $this->app->config->get('hashids'),
+            $this->app->make(HashidsFactory::class)
+        ));
 
         $this->app->bind('hashids', fn (): HashidsManager => $this->app->make(HashidsManager::class));
 

@@ -20,7 +20,7 @@ final class HashidsFactory
      * Alphabet validation (duplicate chars, min length, etc.) is delegated to
      * hashids/hashids which provides clear exception messages.
      *
-     * @param array{salt?: string|mixed, length?: int|string|mixed, alphabet?: string|mixed} $config
+     * @param array{salt?: string, length?: int, alphabet?: string} $config
      */
     public function make(array $config): Hashids
     {

@@ -18,30 +18,27 @@ use Illuminate\Support\ServiceProvider;
 
 final class HashidsServiceProvider extends ServiceProvider implements DeferrableProvider
 {
+    private const CONFIG_PATH = __DIR__ . '/../../config/hashids.php';
+
     public function boot(): void
     {
-        $source = dirname(__DIR__, 2) . '/config/hashids.php';
-
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                $source => config_path('hashids.php'),
+                self::CONFIG_PATH => config_path('hashids.php'),
             ], 'hashids-config');
         }
     }
 
     public function register(): void
     {
-        $source = dirname(__DIR__, 2) . '/config/hashids.php';
-        $this->mergeConfigFrom($source, 'hashids');
+        $this->mergeConfigFrom(self::CONFIG_PATH, 'hashids');
 
         $this->app->singleton(HashidsFactory::class, static fn (): HashidsFactory => new HashidsFactory());
 
-        $this->app->singleton(HashidsManager::class, function ($app): HashidsManager {
-            /** @var array $cfg */
-            $cfg = $app['config']->get('hashids', []);
-
-            return new HashidsManager(is_array($cfg) ? $cfg : [], $app->make(HashidsFactory::class));
-        });
+        $this->app->singleton(HashidsManager::class, fn ($app): HashidsManager => new HashidsManager(
+            $app['config']->get('hashids', []),
+            $app->make(HashidsFactory::class)
+        ));
 
         $this->app->alias(HashidsManager::class, 'hashids');
 

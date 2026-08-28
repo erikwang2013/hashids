@@ -24,11 +24,11 @@ final class HashidsManager
     private array $connections = [];
 
     /**
-     * @param array{default?: string, connections?: array<string, array<string, mixed>>} $config
+     * @param mixed $config Expected shape: array{default?: string, connections?: array<string, array<string, mixed>>}
      */
-    public function __construct(array $config, HashidsFactory $factory)
+    public function __construct(mixed $config, HashidsFactory $factory)
     {
-        $this->config = $config;
+        $this->config = is_array($config) ? $config : [];
         $this->factory = $factory;
     }
 

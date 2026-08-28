@@ -19,8 +19,6 @@ final class HashidsManagerFactory
 {
     public function __invoke(ContainerInterface $container): HashidsManager
     {
-        $config = $container->get(ConfigInterface::class)->get('hashids', []);
-
-        return new HashidsManager(is_array($config) ? $config : [], new HashidsFactory());
+        return new HashidsManager($container->get(ConfigInterface::class)->get('hashids', []), new HashidsFactory());
     }
 }

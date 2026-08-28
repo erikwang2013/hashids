@@ -9,6 +9,8 @@ use Erikwang2013\Hashids\Tests\Support\StubState;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 
+use function Erikwang2013\Hashids\Tests\Support\reflection_accessible;
+
 require_once __DIR__ . '/Support/FrameworkStubs.php';
 
 /**
@@ -42,7 +44,7 @@ final class InstallTest extends TestCase
 
     public function test_path_relation_maps_plugin_config(): void
     {
-        $prop = new ReflectionProperty(Install::class, 'pathRelation');
+        $prop = reflection_accessible(new ReflectionProperty(Install::class, 'pathRelation'));
         $relation = $prop->getValue();
 
         self::assertSame(

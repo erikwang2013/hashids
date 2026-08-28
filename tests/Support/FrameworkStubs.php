@@ -13,6 +13,19 @@ declare(strict_types=1);
  */
 
 namespace Erikwang2013\Hashids\Tests\Support {
+    /**
+     * PHP 8.1+ makes non-public reflection access unconditional; 8.0 needs setAccessible().
+     * PHP 8.5 deprecates setAccessible() — guard keeps tests clean on every supported version.
+     */
+    function reflection_accessible(\ReflectionProperty|\ReflectionMethod $reflection): \ReflectionProperty|\ReflectionMethod
+    {
+        if (\PHP_VERSION_ID < 80100) {
+            $reflection->setAccessible(true);
+        }
+
+        return $reflection;
+    }
+
     final class StubState
     {
         public static bool $globalStubs = false;

@@ -18,6 +18,8 @@ use Illuminate\Support\ServiceProvider;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 
+use function Erikwang2013\Hashids\Tests\Support\reflection_accessible;
+
 require_once __DIR__ . '/../Support/FrameworkStubs.php';
 
 final class HashidsServiceProviderTest extends TestCase
@@ -152,7 +154,7 @@ final class HashidsServiceProviderTest extends TestCase
         self::assertSame([config_path('hashids.php')], array_values($publishes[$class]));
         self::assertFileExists(config_path('hashids.php'));
 
-        $groups = (new \ReflectionProperty(ServiceProvider::class, 'publishGroups'))->getValue();
+        $groups = reflection_accessible(new \ReflectionProperty(ServiceProvider::class, 'publishGroups'))->getValue();
         self::assertArrayHasKey('hashids-config', $groups);
         self::assertSame([config_path('hashids.php')], array_values($groups['hashids-config']));
     }

@@ -28,13 +28,8 @@ final class Bootstrap implements WebmanBootstrapContract
             return;
         }
 
-        $hashidsConfig = config('hashids');
-        if (!is_array($hashidsConfig)) {
-            $hashidsConfig = [];
-        }
-
         $factory = new HashidsFactory();
-        $manager = new HashidsManager($hashidsConfig, $factory);
+        $manager = new HashidsManager(config('hashids'), $factory);
 
         Container::instance()->addDefinitions([
             HashidsFactory::class => static fn (): HashidsFactory => $factory,

@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 
+use function Erikwang2013\Hashids\Tests\Support\reflection_accessible;
+
 require_once __DIR__ . '/../../Support/FrameworkStubs.php';
 
 final class HashidsTest extends TestCase
@@ -27,13 +29,13 @@ final class HashidsTest extends TestCase
     protected function tearDown(): void
     {
         Facade::clearResolvedInstances();
-        (new ReflectionProperty(Facade::class, 'app'))->setValue(null, null);
+        (reflection_accessible(new ReflectionProperty(Facade::class, 'app')))->setValue(null, null);
         Mockery::close();
     }
 
     public function test_facade_accessor_is_manager_class(): void
     {
-        $method = new ReflectionMethod(Hashids::class, 'getFacadeAccessor');
+        $method = reflection_accessible(new ReflectionMethod(Hashids::class, 'getFacadeAccessor'));
 
         self::assertSame(HashidsManager::class, $method->invoke(null));
     }
@@ -47,7 +49,7 @@ final class HashidsTest extends TestCase
 
         $app = Mockery::mock(Container::class, ArrayAccess::class);
         $app->shouldReceive('offsetGet')->with(HashidsManager::class)->andReturn($manager);
-        (new ReflectionProperty(Facade::class, 'app'))->setValue(null, $app);
+        (reflection_accessible(new ReflectionProperty(Facade::class, 'app')))->setValue(null, $app);
 
         $hash = Hashids::encode(1, 2, 3);
         self::assertIsString($hash);
