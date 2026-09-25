@@ -47,7 +47,7 @@
 
   <rect class="bg" x="0" y="0" width="1080" height="612"/>
 
-  <text x="24" y="40" class="t-primary" font-size="20">फ़ीचर डिज़ाइन</text>
+  <text x="24" y="40" class="t-primary" font-size="20">फ़ीचर डिज़ाइन · Feature Design</text>
   <text x="24" y="62" class="t-muted" font-size="11">छह क्षमता समूह: कोर फ्रेमवर्क के बिना भी चलता है, अडैप्टर लेयर केवल कोर को हर फ्रेमवर्क के कंटेनर और कॉन्फ़िग से जोड़ती है</text>
 
   <!-- hub spine + spokes -->

@@ -56,7 +56,7 @@
 
   <rect class="bg" x="0" y="0" width="1080" height="686"/>
 
-  <text x="24" y="40" class="t-primary" font-size="20">Ciclo de vida</text>
+  <text x="24" y="40" class="t-primary" font-size="20">Ciclo de vida · Lifecycle</text>
   <text x="24" y="62" class="t-muted" font-size="11">La instalación registra una sola vez; en ejecución las conexiones se resuelven y se cachean bajo demanda</text>
 
   <!-- lanes -->
