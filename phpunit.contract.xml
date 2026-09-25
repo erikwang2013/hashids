@@ -17,6 +17,9 @@
     <testsuites>
         <testsuite name="contract">
             <directory>tests/Contract</directory>
+            <!-- Laravel 单独跑：它与 Webman 都定义全局 base_path()，不能同 vendor。
+                 见 tests/Contract/Laravel/bootstrap.php 与 phpunit.contract-laravel.xml。 -->
+            <exclude>tests/Contract/Laravel</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

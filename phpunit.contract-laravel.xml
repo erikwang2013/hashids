@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Laravel 契约测试专用配置。
+
+  单独一个配置与作业的原因：Laravel 与 Webman 都定义全局函数 base_path()，
+  装进同一个 vendor 会冲突（谁生效取决于 composer files-autoload 顺序），
+  导致另一侧的 Install 调到错误的实现上。详见 tests/Contract/Laravel/bootstrap.php。
+
+  依赖：orchestra/testbench（CI 的 contract-laravel 作业安装）。
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/Contract/Laravel/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="contract-laravel">
+            <directory>tests/Contract/Laravel</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

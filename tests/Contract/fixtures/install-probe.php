@@ -15,21 +15,13 @@ declare(strict_types=1);
  * 这条我们此前只能靠替身假设的规则——而不是把 base_path 注入成可控值。
  *
  * 用法：php install-probe.php <install|install-confirm|uninstall>
- * 环境变量：HASHIDS_FRAMEWORK_AUTOLOAD 指向装好真框架的 vendor/autoload.php
  * 输出：人可读内容之后跟一行 `---JSON---`，再跟一行结果 JSON。
  */
 
-$frameworkAutoload = getenv('HASHIDS_FRAMEWORK_AUTOLOAD');
-$packageAutoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
-
-if (!is_string($frameworkAutoload) || !is_file($frameworkAutoload)) {
-    fwrite(STDERR, "HASHIDS_FRAMEWORK_AUTOLOAD 未指向存在的 vendor/autoload.php\n");
-    exit(2);
-}
-
-// 顺序要紧：真框架先加载，helpers.php 才会在此时按当前 cwd 定下 BASE_PATH。
-require_once $frameworkAutoload;
-require_once $packageAutoload;
+// 真框架与本包在同一个 vendor（CI 的 contract 作业会把真框架装进本仓库的
+// vendor，本地照做）。加载时 cwd 已是临时应用根，所以 webman 的 helpers.php
+// 会把 BASE_PATH 定在那里。
+require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
 $action = $argv[1] ?? '';
 $configPath = base_path() . '/config/hashids.php';

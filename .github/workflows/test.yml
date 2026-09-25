@@ -53,6 +53,42 @@ jobs:
       - name: Run tests
         run: vendor/bin/phpunit
 
+  # Laravel 契约测试单独一个作业 —— 它**不能**与上面那个合并。
+  #
+  # Laravel 与 Webman 都定义全局函数 base_path()（前者在
+  # Illuminate\Foundation\helpers.php，后者在 support/helpers.php），谁生效取决于
+  # composer files-autoload 的顺序。装进同一个 vendor 时 Laravel 那份会赢，
+  # 于是 Webman 侧的 Install 调用 base_path() 会落到 Laravel 的实现上，而它需要
+  # 启动过的 Laravel 应用 —— 直接 Fatal error:
+  #   Call to undefined method Illuminate\Container\Container::basePath()
+  #
+  # 这条冲突是实测出来的（本地把 laravel/framework 与 webman-framework 装进同一
+  # vendor 后，Webman 与 Install 的契约测试全数报这个错）。真实项目不会同时装
+  # 两者，所以不需要改产品代码，但 CI 必须把两个环境分开。
+  contract-laravel:
+    name: Laravel contract (PHP 8.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Laravel test harness
+        run: >
+          composer require --dev --no-interaction --with-all-dependencies
+          orchestra/testbench:^9.0
+
+      - name: Show resolved versions
+        run: composer show --direct
+
+      - name: Run Laravel contract tests
+        run: vendor/bin/phpunit --configuration phpunit.contract-laravel.xml
+
   # 契约测试：把四个适配器放到**真实框架**面前跑，而不是手写替身。
   #
   # 为什么单独一个作业：真框架包装不进 require-dev —— workerman/webman-framework 要求

@@ -116,14 +116,10 @@ final class InstallContractTest extends TestCase
      */
     private function runProbe(string $action): array
     {
-        $frameworkAutoload = getenv('CONTRACT_VENDOR')
-            ?: dirname(__DIR__, 2) . '/vendor/autoload.php';
-
         $command = [PHP_BINARY, __DIR__ . '/fixtures/install-probe.php', $action];
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
 
         $process = proc_open($command, $descriptors, $pipes, $this->appRoot, [
-            'HASHIDS_FRAMEWORK_AUTOLOAD' => $frameworkAutoload,
             'PATH' => (string) getenv('PATH'),
         ]);
 
