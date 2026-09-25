@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Erikwang2013\Hashids\Tests;
 
 use Erikwang2013\Hashids\Install;
+use Erikwang2013\Hashids\Mascot;
 use Erikwang2013\Hashids\Tests\Support\StubState;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -55,6 +56,9 @@ final class InstallTest extends TestCase
 
     public function test_install_copies_plugin_config_and_publishes_hashids_config(): void
     {
+        // 首次安装会打印项目宠物问候。
+        $this->expectOutputRegex('/' . preg_quote(Mascot::NAME, '/') . '/');
+
         Install::install();
 
         self::assertCount(1, StubState::$copied);
@@ -73,6 +77,9 @@ final class InstallTest extends TestCase
         mkdir(dirname($dest), 0755, true);
         file_put_contents($dest, '<?php return ["custom" => true];');
 
+        // 已有配置 => 不是首次安装 => 保持安静。
+        $this->expectOutputString('');
+
         Install::install();
 
         self::assertSame('<?php return ["custom" => true];', file_get_contents($dest));
@@ -83,6 +90,9 @@ final class InstallTest extends TestCase
         $dest = $this->base . '/config/hashids.php';
         mkdir(dirname($dest), 0755, true);
         file_put_contents($dest, 'old-content');
+
+        // 显式覆盖发布配置同样算重新打招呼。
+        $this->expectOutputRegex('/' . preg_quote(Mascot::NAME, '/') . '/');
 
         Install::install(true);
 

@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 612" role="img" aria-labelledby="featTitle featDesc">
+  <title id="featTitle">erikwang2013/hashids फ़ीचर डिज़ाइन</title>
+  <desc id="featDesc">छह क्षमता समूह: encode/decode API, मल्टी-कनेक्शन प्रबंधन, मल्टी-फ्रेमवर्क अडैप्टेशन, कंटेनर बाइंडिंग की तिकड़ी, कॉन्फ़िग और पब्लिश, शून्य-निर्भरता कोर।</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "PingFang SC", "Microsoft YaHei", monospace; }
+      .bg     { fill: #ffffff; }
+      .card   { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
+      .spine  { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }
+      .t-primary { fill: #0f172a; font-weight: 600; }
+      .t-muted   { fill: #475569; }
+      .t-dim     { fill: #94a3b8; }
+      .t-frontend   { fill: #0891b2; font-weight: 600; }
+      .t-backend    { fill: #059669; font-weight: 600; }
+      .t-database   { fill: #7c3aed; font-weight: 600; }
+      .t-cloud      { fill: #d97706; font-weight: 600; }
+      .t-security   { fill: #e11d48; font-weight: 600; }
+      .t-messagebus { fill: #ea580c; font-weight: 600; }
+      .a-head { fill: #cbd5e1; }
+
+      @media (prefers-color-scheme: dark) {
+        .bg    { fill: #0b1220; }
+        .card  { fill: #0f172a; stroke: #1e293b; }
+        .spine { stroke: #334155; }
+        .t-primary { fill: #f8fafc; }
+        .t-muted   { fill: #94a3b8; }
+        .t-dim     { fill: #64748b; }
+        .t-frontend   { fill: #22d3ee; }
+        .t-backend    { fill: #34d399; }
+        .t-database   { fill: #a78bfa; }
+        .t-cloud      { fill: #fbbf24; }
+        .t-security   { fill: #fb7185; }
+        .t-messagebus { fill: #fb923c; }
+        .a-head { fill: #334155; }
+      }
+    </style>
+
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" class="a-head"/>
+    </marker>
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1080" height="612"/>
+
+  <text x="24" y="40" class="t-primary" font-size="20">फ़ीचर डिज़ाइन</text>
+  <text x="24" y="62" class="t-muted" font-size="11">छह क्षमता समूह: कोर फ्रेमवर्क के बिना भी चलता है, अडैप्टर लेयर केवल कोर को हर फ्रेमवर्क के कंटेनर और कॉन्फ़िग से जोड़ती है</text>
+
+  <!-- hub spine + spokes -->
+  <path class="spine" d="M540 164 V516"/>
+  <path class="spine" d="M540 256 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 386 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 516 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 256 H620" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 386 H620" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 516 H620" marker-end="url(#ah)"/>
+
+  <!-- hub -->
+  <rect x="440" y="88" width="200" height="76" rx="14" fill="url(#rootGrad)"/>
+  <text x="540" y="120" font-size="11" font-weight="700" fill="#0f172a" text-anchor="middle">erikwang2013/hashids</text>
+  <text x="540" y="142" font-size="9" fill="rgba(15,23,42,.72)" text-anchor="middle">PHP मल्टी-फ्रेमवर्क इंटीग्रेशन पैकेज</text>
+
+  <!-- left column -->
+  <rect class="card" x="60" y="200" width="400" height="112" rx="12"/>
+  <text class="t-frontend" x="82" y="233" font-size="13">encode/decode API</text>
+  <text class="t-muted" x="82" y="260" font-size="10">encode() / decode() / encodeHex() / decodeHex()</text>
+  <text class="t-muted" x="82" y="282" font-size="10">HashidsManager::__call() से डिफ़ॉल्ट कनेक्शन पर</text>
+  <text class="t-dim"   x="82" y="302" font-size="10">कनेक्शन न बताएँ तो connection() ज़रूरी नहीं</text>
+
+  <rect class="card" x="60" y="330" width="400" height="112" rx="12"/>
+  <text class="t-database" x="82" y="363" font-size="13">मल्टी-फ्रेमवर्क अडैप्टेशन</text>
+  <text class="t-muted" x="82" y="390" font-size="10">Laravel / Webman / ThinkPHP / Hyperf — चारों</text>
+  <text class="t-muted" x="82" y="412" font-size="10">Laravel = ServiceProvider · Webman = Bootstrap</text>
+  <text class="t-dim"   x="82" y="432" font-size="10">ThinkPHP = Service · Hyperf = ConfigProvider</text>
+
+  <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
+  <text class="t-security" x="82" y="493" font-size="13">कॉन्फ़िग और पब्लिश</text>
+  <text class="t-muted" x="82" y="520" font-size="10">फ्लैट संरचना: Laravel / Webman / ThinkPHP</text>
+  <text class="t-muted" x="82" y="542" font-size="10">hashids key में लिपटी संरचना: Hyperf</text>
+  <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · Install कॉपी · publish</text>
+
+  <!-- right column -->
+  <rect class="card" x="620" y="200" width="400" height="112" rx="12"/>
+  <text class="t-backend" x="642" y="233" font-size="13">मल्टी-कनेक्शन प्रबंधन</text>
+  <text class="t-muted" x="642" y="260" font-size="10">connection('alternative') से नामित कनेक्शन स्विच</text>
+  <text class="t-muted" x="642" y="282" font-size="10">लेज़ी बिल्ड + इंस्टेंस कैश, एक कनेक्शन केवल एक बार</text>
+  <text class="t-dim"   x="642" y="302" font-size="10">default गायब/अमान्य हो तो 'main' पर फ़ॉलबैक</text>
+
+  <rect class="card" x="620" y="330" width="400" height="112" rx="12"/>
+  <text class="t-cloud" x="642" y="363" font-size="13">कंटेनर बाइंडिंग की तिकड़ी</text>
+  <text class="t-muted" x="642" y="390" font-size="10">HashidsManager::class / 'hashids'</text>
+  <text class="t-muted" x="642" y="412" font-size="10">Hashids\Hashids (डिफ़ॉल्ट कनेक्शन इंस्टेंस)</text>
+  <text class="t-dim"   x="642" y="432" font-size="10">कंस्ट्रक्टर इंजेक्शन और कंटेनर get() दोनों</text>
+
+  <rect class="card" x="620" y="460" width="400" height="112" rx="12"/>
+  <text class="t-messagebus" x="642" y="493" font-size="13">शून्य-निर्भरता कोर</text>
+  <text class="t-muted" x="642" y="520" font-size="10">new HashidsManager($config, $factory) से सीधे काम</text>
+  <text class="t-muted" x="642" y="542" font-size="10">कॉन्फ़िग HashidsManager के अंदर नॉर्मलाइज़, mixed इनपुट चलता है</text>
+  <text class="t-dim"   x="642" y="562" font-size="10">कोर को कोई फ्रेमवर्क पैकेज require नहीं</text>
+</svg>

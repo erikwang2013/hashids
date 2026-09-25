@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 686" role="img" aria-labelledby="lifeTitle lifeDesc">
+  <title id="lifeTitle">erikwang2013/hashids লাইফসাইকল</title>
+  <desc id="lifeDesc">তিনটি পর্যায়: ইনস্টল পর্যায় (composer require, অটো-ডিসকভারি, কনফিগ লোড), রানটাইম পর্যায় (কন্টেইনার HashidsManager রেজলভ, encode/decode কল, দরকারমতো কানেকশন তৈরি ও ক্যাশে), আনইনস্টল পর্যায় (composer remove → Install::uninstall)।</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "PingFang SC", "Microsoft YaHei", monospace; }
+      .bg         { fill: #ffffff; }
+      .lane       { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
+      .lane-title { fill: #94a3b8; font-size: 10px; letter-spacing: 1.2px; }
+      .c-mask     { fill: #ffffff; }
+      .c-frontend { fill: rgba(34,211,238,.15);  stroke: #0891b2; stroke-width: 1.5; }
+      .c-backend  { fill: rgba(52,211,153,.18);  stroke: #059669; stroke-width: 1.5; }
+      .c-cloud    { fill: rgba(251,191,36,.18);  stroke: #d97706; stroke-width: 1.5; }
+      .c-security { fill: rgba(251,113,133,.18); stroke: #e11d48; stroke-width: 1.5; }
+      .t-primary  { fill: #0f172a; font-weight: 600; }
+      .t-muted    { fill: #475569; }
+      .t-dim      { fill: #94a3b8; }
+      .t-backend  { fill: #059669; font-weight: 600; }
+      .t-security { fill: #e11d48; font-weight: 600; }
+      .a-default  { stroke: #94a3b8; fill: none; }
+      .a-emphasis { stroke: #059669; fill: none; }
+      .a-dashed   { stroke: #059669; fill: none; stroke-dasharray: 5,5; }
+      .a-head-default  { fill: #94a3b8; }
+      .a-head-emphasis { fill: #059669; }
+
+      @media (prefers-color-scheme: dark) {
+        .bg         { fill: #0b1220; }
+        .lane       { fill: #0f172a; stroke: #1e293b; }
+        .lane-title { fill: #64748b; }
+        .c-mask     { fill: #0f172a; }
+        .c-frontend { fill: rgba(8,51,68,.40);   stroke: #22d3ee; }
+        .c-backend  { fill: rgba(6,78,59,.40);   stroke: #34d399; }
+        .c-cloud    { fill: rgba(120,53,15,.35); stroke: #fbbf24; }
+        .c-security { fill: rgba(136,19,55,.40); stroke: #fb7185; }
+        .t-primary  { fill: #f8fafc; }
+        .t-muted    { fill: #94a3b8; }
+        .t-dim      { fill: #64748b; }
+        .t-backend  { fill: #34d399; }
+        .t-security { fill: #fb7185; }
+        .a-default  { stroke: #64748b; }
+        .a-emphasis { stroke: #34d399; }
+        .a-dashed   { stroke: #34d399; }
+        .a-head-default  { fill: #64748b; }
+        .a-head-emphasis { fill: #34d399; }
+      }
+    </style>
+
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" class="a-head-default"/>
+    </marker>
+    <marker id="ah-e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" class="a-head-emphasis"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1080" height="686"/>
+
+  <text x="24" y="40" class="t-primary" font-size="20">লাইফসাইকল · Lifecycle</text>
+  <text x="24" y="62" class="t-muted" font-size="11">ইনস্টলে একবারই রেজিস্ট্রেশন, রানটাইমে দরকারমতো কানেকশন তৈরি ও ক্যাশে, আনইনস্টলে শুধু প্লাগিন কনফিগ সরানো হয়</text>
+
+  <!-- lanes -->
+  <rect class="lane" x="20" y="78"  width="1040" height="130" rx="10"/>
+  <rect class="lane" x="20" y="234" width="1040" height="272" rx="10"/>
+  <rect class="lane" x="20" y="530" width="1040" height="126" rx="10"/>
+
+  <text class="lane-title" x="36" y="98">পর্যায় ১ · ইনস্টল INSTALL</text>
+  <text class="lane-title" x="36" y="254">পর্যায় ২ · রানটাইম RUNTIME</text>
+  <text class="lane-title" x="36" y="550">পর্যায় ৩ · আনইনস্টল UNINSTALL</text>
+
+  <!-- stage arrows -->
+  <line class="a-emphasis" x1="540" y1="208" x2="540" y2="230" stroke-width="2" marker-end="url(#ah-e)"/>
+  <line class="a-emphasis" x1="540" y1="506" x2="540" y2="528" stroke-width="2" marker-end="url(#ah-e)"/>
+
+  <!-- install-period arrows -->
+  <line class="a-default" x1="310" y1="159" x2="406" y2="159" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line class="a-default" x1="665" y1="159" x2="761" y2="159" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- runtime arrows -->
+  <line class="a-default" x1="290" y1="320" x2="336" y2="320" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line class="a-default" x1="540" y1="320" x2="586" y2="320" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line class="a-default" x1="810" y1="320" x2="856" y2="320" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line class="a-dashed"  x1="700" y1="352" x2="700" y2="392" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- stage 1 -->
+  <rect class="c-mask"     x="60"  y="118" width="250" height="82" rx="10"/>
+  <rect class="c-frontend" x="60"  y="118" width="250" height="82" rx="10"/>
+  <text class="t-dim"     x="76"  y="137" font-size="9">01</text>
+  <text class="t-primary" x="185" y="163" font-size="12" text-anchor="middle">composer require</text>
+  <text class="t-muted"   x="185" y="183" font-size="9"  text-anchor="middle">এই প্যাকেজ ও hashids/hashids আনে</text>
+
+  <rect class="c-mask"    x="415" y="118" width="250" height="82" rx="10"/>
+  <rect class="c-backend" x="415" y="118" width="250" height="82" rx="10"/>
+  <text class="t-dim"     x="431" y="137" font-size="9">02</text>
+  <text class="t-primary" x="540" y="163" font-size="12" text-anchor="middle">অটো-ডিসকভারি / ইনস্টল হুক</text>
+  <text class="t-muted"   x="540" y="183" font-size="9"  text-anchor="middle">Laravel অটো-ডিসকভারি · Webman হুক</text>
+
+  <rect class="c-mask"  x="770" y="118" width="250" height="82" rx="10"/>
+  <rect class="c-cloud" x="770" y="118" width="250" height="82" rx="10"/>
+  <text class="t-dim"     x="786" y="137" font-size="9">03</text>
+  <text class="t-primary" x="895" y="163" font-size="12" text-anchor="middle">কনফিগ লোড</text>
+  <text class="t-muted"   x="895" y="183" font-size="9"  text-anchor="middle">salt / length / alphabet</text>
+
+  <!-- stage 2 -->
+  <rect class="c-mask"    x="60"  y="288" width="230" height="64" rx="10"/>
+  <rect class="c-backend" x="60"  y="288" width="230" height="64" rx="10"/>
+  <text class="t-primary" x="175" y="316" font-size="11" text-anchor="middle">HashidsManager</text>
+  <text class="t-muted"   x="175" y="338" font-size="9"  text-anchor="middle">কন্টেইনার get() / কনস্ট্রাক্টর</text>
+
+  <rect class="c-mask"    x="340" y="288" width="200" height="64" rx="10"/>
+  <rect class="c-backend" x="340" y="288" width="200" height="64" rx="10"/>
+  <text class="t-primary" x="440" y="316" font-size="11" text-anchor="middle">encode() / decode()</text>
+  <text class="t-muted"   x="440" y="338" font-size="9"  text-anchor="middle">Facade / app('hashids')</text>
+
+  <rect class="c-mask"    x="590" y="288" width="220" height="64" rx="10"/>
+  <rect class="c-backend" x="590" y="288" width="220" height="64" rx="10"/>
+  <text class="t-primary" x="700" y="316" font-size="11" text-anchor="middle">__call() → connection($name)</text>
+  <text class="t-muted"   x="700" y="338" font-size="9"  text-anchor="middle">না দিলে ডিফল্ট কানেকশন</text>
+
+  <rect class="c-mask"     x="860" y="288" width="160" height="64" rx="10"/>
+  <rect class="c-frontend" x="860" y="288" width="160" height="64" rx="10"/>
+  <text class="t-primary" x="940" y="316" font-size="11" text-anchor="middle">শর্ট ID / মূল সংখ্যা</text>
+  <text class="t-muted"   x="940" y="338" font-size="9"  text-anchor="middle">কলারকে ফেরত</text>
+
+  <rect class="c-mask"    x="340" y="396" width="680" height="80" rx="10"/>
+  <rect class="c-backend" x="340" y="396" width="680" height="80" rx="10"/>
+  <text class="t-backend" x="362" y="420" font-size="11">কানেকশন রেজলভ · লেজি লোড + ইনস্ট্যান্স ক্যাশে</text>
+  <text class="t-muted"   x="362" y="442" font-size="9">$connections[$name] হিট হলে সরাসরি ব্যবহার, আবার বিল্ড নয়</text>
+  <text class="t-muted"   x="362" y="462" font-size="9">মিস হলে → HashidsFactory::make() তৈরি করে ক্যাশে লেখে</text>
+
+  <!-- stage 3 -->
+  <rect class="c-mask"     x="60" y="566" width="960" height="78" rx="10"/>
+  <rect class="c-security" x="60" y="566" width="960" height="78" rx="10"/>
+  <text class="t-security" x="82" y="590" font-size="12">composer remove · প্যাকেজ আনইনস্টল</text>
+  <text class="t-muted"    x="82" y="612" font-size="9">Install::uninstall() চলে: config/plugin/erikwang2013/hashids মুছে যায়</text>
+  <text class="t-muted"    x="82" y="632" font-size="9">config/hashids.php থেকে যায়, মুছবেন কি না ব্যবহারকারীর সিদ্ধান্ত</text>
+</svg>

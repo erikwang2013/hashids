@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 612" role="img" aria-labelledby="featTitle featDesc">
+  <title id="featTitle">erikwang2013/hashids Funktionsdesign</title>
+  <desc id="featDesc">Sechs Fähigkeitsgruppen: Kodierungs-API, Verwaltung mehrerer Verbindungen, Multi-Framework-Adapter, Container-Bindung, Konfiguration und Veröffentlichung, Kern ohne Framework-Abhängigkeit.</desc>
+
+  <defs>
+    <style>
+      text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "PingFang SC", "Microsoft YaHei", monospace; }
+      .bg     { fill: #ffffff; }
+      .card   { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
+      .spine  { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }
+      .t-primary { fill: #0f172a; font-weight: 600; }
+      .t-muted   { fill: #475569; }
+      .t-dim     { fill: #94a3b8; }
+      .t-frontend   { fill: #0891b2; font-weight: 600; }
+      .t-backend    { fill: #059669; font-weight: 600; }
+      .t-database   { fill: #7c3aed; font-weight: 600; }
+      .t-cloud      { fill: #d97706; font-weight: 600; }
+      .t-security   { fill: #e11d48; font-weight: 600; }
+      .t-messagebus { fill: #ea580c; font-weight: 600; }
+      .a-head { fill: #cbd5e1; }
+
+      @media (prefers-color-scheme: dark) {
+        .bg    { fill: #0b1220; }
+        .card  { fill: #0f172a; stroke: #1e293b; }
+        .spine { stroke: #334155; }
+        .t-primary { fill: #f8fafc; }
+        .t-muted   { fill: #94a3b8; }
+        .t-dim     { fill: #64748b; }
+        .t-frontend   { fill: #22d3ee; }
+        .t-backend    { fill: #34d399; }
+        .t-database   { fill: #a78bfa; }
+        .t-cloud      { fill: #fbbf24; }
+        .t-security   { fill: #fb7185; }
+        .t-messagebus { fill: #fb923c; }
+        .a-head { fill: #334155; }
+      }
+    </style>
+
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" class="a-head"/>
+    </marker>
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1080" height="612"/>
+
+  <text x="24" y="40" class="t-primary" font-size="20">Funktionsdesign · Feature Design</text>
+  <text x="24" y="62" class="t-muted" font-size="11">Sechs Gruppen: Der Kern läuft ohne Framework; Adapter verdrahten ihn nur mit Container und Konfiguration.</text>
+
+  <!-- hub spine + spokes -->
+  <path class="spine" d="M540 164 V516"/>
+  <path class="spine" d="M540 256 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 386 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 516 H460" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 256 H620" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 386 H620" marker-end="url(#ah)"/>
+  <path class="spine" d="M540 516 H620" marker-end="url(#ah)"/>
+
+  <!-- hub -->
+  <rect x="440" y="88" width="200" height="76" rx="14" fill="url(#rootGrad)"/>
+  <text x="540" y="120" font-size="11" font-weight="700" fill="#0f172a" text-anchor="middle">erikwang2013/hashids</text>
+  <text x="540" y="142" font-size="9" fill="rgba(15,23,42,.72)" text-anchor="middle">PHP-Multi-Framework-Paket</text>
+
+  <!-- left column -->
+  <rect class="card" x="60" y="200" width="400" height="112" rx="12"/>
+  <text class="t-frontend" x="82" y="233" font-size="13">Kodierungs-API</text>
+  <text class="t-muted" x="82" y="260" font-size="10">encode() / decode() / encodeHex() / decodeHex()</text>
+  <text class="t-muted" x="82" y="282" font-size="10">Weiterleitung via HashidsManager::__call()</text>
+  <text class="t-dim"   x="82" y="302" font-size="10">ohne Verbindungsangabe: kein connection()</text>
+
+  <rect class="card" x="60" y="330" width="400" height="112" rx="12"/>
+  <text class="t-database" x="82" y="363" font-size="13">Framework-Adapter</text>
+  <text class="t-muted" x="82" y="390" font-size="10">Vier Integrationen: Laravel / Webman / ThinkPHP / Hyperf</text>
+  <text class="t-muted" x="82" y="412" font-size="10">Laravel = ServiceProvider · Webman = Bootstrap</text>
+  <text class="t-dim"   x="82" y="432" font-size="10">ThinkPHP = Service · Hyperf = ConfigProvider</text>
+
+  <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
+  <text class="t-security" x="82" y="493" font-size="13">Konfiguration und Publishing</text>
+  <text class="t-muted" x="82" y="520" font-size="10">Flache Struktur: Laravel / Webman / ThinkPHP</text>
+  <text class="t-muted" x="82" y="542" font-size="10">Struktur unter hashids: Hyperf</text>
+  <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · Install-Kopie · publish</text>
+
+  <!-- right column -->
+  <rect class="card" x="620" y="200" width="400" height="112" rx="12"/>
+  <text class="t-backend" x="642" y="233" font-size="13">Verbindungsverwaltung</text>
+  <text class="t-muted" x="642" y="260" font-size="10">connection('alternative') schaltet um</text>
+  <text class="t-muted" x="642" y="282" font-size="10">Lazy-Aufbau + Instanz-Cache, nur einmal je Verbindung</text>
+  <text class="t-dim"   x="642" y="302" font-size="10">default fehlt/ungültig → Rückfall 'main'</text>
+
+  <rect class="card" x="620" y="330" width="400" height="112" rx="12"/>
+  <text class="t-cloud" x="642" y="363" font-size="13">Container-Bindung (3er-Set)</text>
+  <text class="t-muted" x="642" y="390" font-size="10">HashidsManager::class / 'hashids'</text>
+  <text class="t-muted" x="642" y="412" font-size="10">Hashids\Hashids (Standardverbindung)</text>
+  <text class="t-dim"   x="642" y="432" font-size="10">Konstruktor-Injektion und Container get()</text>
+
+  <rect class="card" x="620" y="460" width="400" height="112" rx="12"/>
+  <text class="t-messagebus" x="642" y="493" font-size="13">Kern ohne Framework-Abhängigkeit</text>
+  <text class="t-muted" x="642" y="520" font-size="10">new HashidsManager($config, $factory) genügt</text>
+  <text class="t-muted" x="642" y="542" font-size="10">Normalisierung im HashidsManager, mixed erlaubt</text>
+  <text class="t-dim"   x="642" y="562" font-size="10">Der Kern braucht kein Framework-Paket</text>
+</svg>

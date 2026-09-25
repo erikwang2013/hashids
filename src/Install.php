@@ -47,6 +47,11 @@ final class Install
                 mkdir($hashidsParent, 0755, true);
             }
             copy($hashidsSrc, $hashidsDest);
+
+            // Only on first install (or an explicit confirm-overwrite) does the
+            // package actually say hello — re-running install on `composer update`
+            // stays quiet.
+            echo Mascot::greet();
         }
     }
 
