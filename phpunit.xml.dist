@@ -7,6 +7,9 @@
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
+            <!-- 契约测试需要真实框架包（要求 PHP >= 8.1/8.2），装不进 `php: ^8.0` 的矩阵。
+                 它们由 phpunit.contract.xml + CI 的 contract 作业单独运行。 -->
+            <exclude>tests/Contract</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

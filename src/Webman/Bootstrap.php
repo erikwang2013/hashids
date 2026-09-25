@@ -23,8 +23,21 @@ final class Bootstrap implements WebmanBootstrapContract
 {
     public static function start(?Worker $worker): void
     {
+        // 插件开关的真实位置是 $plugin['app']['enable'] —— 真实 Webman 下
+        // config('plugin.<vendor>.<name>') 的形状是 ['app' => [...], 'bootstrap' => [...]]，
+        // enable 不在顶层。原先写成 $plugin['enable'] ?? true 是恒真的死代码。
+        //
+        // 正常流程其实轮不到这里把关：插件 app.php 里 enable 为假时
+        // Webman\Config::loadFromDir() 会跳过整个插件目录，本方法根本不会被调用。
+        // 这道检查守的是纵深缺口 —— 用户若把 Bootstrap::class 手动注册进应用级
+        // config/bootstrap.php，插件即便已关闭，start() 仍会被执行。
+        //
+        // 那个场景下配置是**整个缺失**的（框架跳过了插件目录，键根本不存在），
+        // 所以默认值必须取「关闭」：写成 ?? true 会让 null 兜底成「开」，
+        // 缺口原样敞开。合法路径下 app.enable 必然为真（目录级闸门先过了），
+        // 这个默认值只影响上面那条非法路径，不会误伤正常安装。
         $plugin = config('plugin.erikwang2013.hashids');
-        if (!($plugin['enable'] ?? true)) {
+        if (!is_array($plugin) || !($plugin['app']['enable'] ?? false)) {
             return;
         }
 

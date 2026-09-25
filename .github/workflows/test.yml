@@ -53,6 +53,46 @@ jobs:
       - name: Run tests
         run: vendor/bin/phpunit
 
+  # 契约测试：把四个适配器放到**真实框架**面前跑，而不是手写替身。
+  #
+  # 为什么单独一个作业：真框架包装不进 require-dev —— workerman/webman-framework 要求
+  # PHP >= 8.1、hyperf/* 要求 >= 8.2，而本包声明 `php: ^8.0`。写进去会让 8.0 的作业
+  # 直接解析失败。所以只在 8.2 上按需安装并跑 tests/Contract。
+  #
+  # 这一层要守住的问题类型：Hyperf 的配置多包一层导致整个集成不可用，是「适配器约定
+  # 从未对着真框架验过」的典型 —— 当时的测试全用手写替身，替身按同一个错误假设写的，
+  # 所以永远是绿的。
+  contract:
+    name: Real-framework contract (PHP 8.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install package dependencies
+        run: composer update --prefer-dist --no-progress --no-interaction
+
+      - name: Install real frameworks
+        run: >
+          composer require --dev --no-interaction --with-all-dependencies
+          topthink/framework:^8.0
+          workerman/webman-framework:^2.0
+          hyperf/contract:^3.0
+          hyperf/config:^3.0
+          hyperf/di:^3.0
+
+      - name: Show resolved versions
+        run: composer show --direct
+
+      - name: Run contract tests
+        run: vendor/bin/phpunit --configuration phpunit.contract.xml
+
   lowest:
     name: PHP 8.0 + lowest deps
     runs-on: ubuntu-latest
