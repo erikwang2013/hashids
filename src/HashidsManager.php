@@ -78,6 +78,20 @@ final class HashidsManager
     }
 
     /**
+     * 切换默认连接名。
+     *
+     * 对齐 vinkla/hashids（其 HashidsManager 继承的 AbstractManager 暴露此方法）。
+     * 只改后续 connection() 的解析目标，**不校验该连接是否已配置** —— 与 Laravel
+     * 的 Manager 一致，配置错误留到真正取用时暴露。
+     */
+    public function setDefaultConnection(string $name): static
+    {
+        $this->config['default'] = $name;
+
+        return $this;
+    }
+
+    /**
      * Dynamically pass methods onto the default connection.
      *
      * @param array<int, mixed> $parameters

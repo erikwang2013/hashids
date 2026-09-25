@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 612" role="img" aria-labelledby="featTitle featDesc">
   <title id="featTitle">erikwang2013/hashids تصميم المزايا</title>
-  <desc id="featDesc">ست مجموعات قدرات: واجهة الترميز وفكّه، إدارة الاتصالات المتعددة، تكييف عدة أطر، ثلاثية ربط الحاوية، الإعدادات والنشر، نواة بلا اعتماد على أي إطار.</desc>
+  <desc id="featDesc">ست مجموعات قدرات: واجهة الترميز وفكّه، إدارة الاتصالات المتعددة، تكييف عدة أطر، ربط الحاوية، الإعدادات والنشر، نواة بلا اعتماد على أي إطار.</desc>
 
   <defs>
     <style>
@@ -79,8 +79,8 @@
 
   <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
   <text class="t-security" x="82" y="493" font-size="13">الإعدادات والنشر</text>
-  <text class="t-muted" x="82" y="520" font-size="10">بنية مسطّحة: Laravel / Webman / ThinkPHP</text>
-  <text class="t-muted" x="82" y="542" font-size="10">بنية مغلّفة بـ hashids: Hyperf</text>
+  <text class="t-muted" x="82" y="520" font-size="10">بنية مسطّحة: الأطر الأربعة متطابقة</text>
+  <text class="t-muted" x="82" y="542" font-size="10">المسار: config/hashids.php أو autoload/</text>
   <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · نسخ عبر Install · publish</text>
 
   <!-- right column -->
@@ -91,8 +91,8 @@
   <text class="t-dim"   x="642" y="302" font-size="10">الرجوع إلى 'main' إن غاب default أو كان غير صالح</text>
 
   <rect class="card" x="620" y="330" width="400" height="112" rx="12"/>
-  <text class="t-cloud" x="642" y="363" font-size="13">ثلاثية ربط الحاوية</text>
-  <text class="t-muted" x="642" y="390" font-size="10">HashidsManager::class / 'hashids'</text>
+  <text class="t-cloud" x="642" y="363" font-size="13">ربط الحاوية</text>
+  <text class="t-muted" x="642" y="390" font-size="10">ربط أسماء الأصناف ومفاتيح نصية مثل 'hashids'</text>
   <text class="t-muted" x="642" y="412" font-size="10">Hashids\Hashids (نسخة الاتصال الافتراضي)</text>
   <text class="t-dim"   x="642" y="432" font-size="10">يدعم حقن البانية و get() من الحاوية</text>
 

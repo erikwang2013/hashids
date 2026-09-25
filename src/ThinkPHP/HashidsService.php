@@ -30,6 +30,10 @@ final class HashidsService extends ThinkService
 
         $this->app->bind('hashids', fn (): HashidsManager => $this->app->make(HashidsManager::class));
 
+        $this->app->bind('hashids.factory', fn (): HashidsFactory => $this->app->make(HashidsFactory::class));
+
+        $this->app->bind('hashids.connection', fn (): HashidsClient => $this->app->make(HashidsManager::class)->connection());
+
         $this->app->bind(HashidsClient::class, fn (): HashidsClient => $this->app->make(HashidsManager::class)->connection());
     }
 }

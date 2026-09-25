@@ -35,6 +35,8 @@ final class Bootstrap implements WebmanBootstrapContract
             HashidsFactory::class => static fn (): HashidsFactory => $factory,
             HashidsManager::class => static fn (): HashidsManager => $manager,
             'hashids' => static fn (): HashidsManager => $manager,
+            'hashids.factory' => static fn (): HashidsFactory => $factory,
+            'hashids.connection' => static fn (): HashidsClient => $manager->connection(),
             HashidsClient::class => static fn (): HashidsClient => $manager->connection(),
         ]);
     }

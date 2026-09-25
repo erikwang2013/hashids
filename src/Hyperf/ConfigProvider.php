@@ -23,6 +23,12 @@ final class ConfigProvider
                 HashidsFactory::class => HashidsFactory::class,
                 HashidsManager::class => HashidsManagerFactory::class,
                 HashidsClient::class => HashidsClientFactory::class,
+                // 字符串键：'hashids' 与另外三个框架保持一致，
+                // 'hashids.factory' / 'hashids.connection' 对齐 vinkla/hashids 的命名，
+                // 便于从 vinkla 迁移过来、按字符串取用的代码继续工作。
+                'hashids' => HashidsManagerFactory::class,
+                'hashids.factory' => HashidsFactory::class,
+                'hashids.connection' => HashidsClientFactory::class,
             ],
             'publish' => [
                 [

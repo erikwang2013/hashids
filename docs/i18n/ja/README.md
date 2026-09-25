@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # Webman\Bootstrap を登録
 ├── config/
 │   ├── hashids.php                            # フラット設定：Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Hyperf 設定（外側を hashids キーで包む）
+│   └── autoload/hashids.php                   # Hyperf 設定（構造はフラットと同じ、パスが異なる）
 ├── tests/
 │   ├── HashidsManagerTest.php                 # コアの振る舞い
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ hashids/
 - **エンコード / デコード API**：`encode()` / `decode()` / `encodeHex()` / `decodeHex()` は `__call()` を経由してデフォルト接続に到達するため、`connection()` を明示する必要はありません。
 - **マルチ接続管理**：`connection('alternative')` で切り替え。遅延構築で、同じ接続は一度だけ構築されます。
 - **マルチフレームワーク適応**：Laravel は `ServiceProvider`、Webman は `Install` + `Bootstrap`、ThinkPHP は `Service`、Hyperf は `ConfigProvider` と、それぞれの慣用法に従います。
-- **コンテナバインディング**：`HashidsManager::class`、`'hashids'`、`Hashids\Hashids`（デフォルト接続のインスタンス）の 3 点セットで、4 フレームワーク共通です。
-- **設定と公開**：Laravel/Webman/ThinkPHP はフラット構造、Hyperf は `hashids` キーで包む構造です。
+- **コンテナバインディング**：クラス名（`HashidsManager`、`HashidsFactory`、`Hashids\Hashids`）と文字列キー（`'hashids'`、`'hashids.factory'`、`'hashids.connection'`）の二本立てのバインディングで、4 フレームワーク共通です。後ろ 2 つの文字列キーは vinkla/hashids と同名なので、移行が容易です。
+- **設定と公開**：4 つのフレームワークで構造は一致し、いずれも**フラット配列**（ルート直下の `default` + `connections`）です。異なるのはファイルパスだけです。
 - **フレームワーク非依存カーネル**：`new HashidsManager($config, $factory)` だけで動作し、`$config` の引数は非配列も許容します（空配列に正規化）。
 
 ## ライフサイクル
@@ -139,7 +139,7 @@ composer require erikwang2013/hashids
 - `default`：デフォルトの接続名（例：`main`）。
 - `connections`：接続名 => `salt`、`length`、任意で `alphabet`。
 
-> **Hyperf** は別の設定ファイル形式（外側のキーが `hashids`）を使います。後述の Hyperf の節を参照してください。
+> **Hyperf** は設定ファイルのパスが異なります（`config/autoload/hashids.php`）。ただし構造は同じです。後述の Hyperf の節を参照してください。
 
 ## フレームワークなしでの使い方
 
@@ -239,9 +239,9 @@ return [
 
 **コンテナバインディング**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids`（デフォルト接続のインスタンス）
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'`（デフォルト接続のインスタンス）
 
 **コントローラの例**
 
@@ -345,7 +345,9 @@ Composer の **`extra.hyperf.config`** が `ConfigProvider` を読み込み、�
 
 パッケージ内の **`config/autoload/hashids.php`** をプロジェクトの **`config/autoload/hashids.php`** にコピーします（またはプロジェクトの設定公開コマンドを使います）。
 
-このファイルは **最上位のキーを `hashids`** にする必要があり、`ConfigInterface::get('hashids')` で読み取られます。
+このファイルは**フラット配列**（ルート直下の `default` + `connections`）を返す必要があります。
+
+Hyperf の `ConfigFactory` は**ファイル名**で設定をマージします（`Arr::set($config, 'hashids', require $file)`）。そのため `config('hashids')` が返すのはファイルの内容そのものです——**`'hashids' =>` でさらに一段包んではいけません**。包むと `connections` に到達できず、接続を取得するときに `Hashids connection [main] is not configured` がスローされます。
 
 ```php
 <?php
@@ -353,13 +355,11 @@ Composer の **`extra.hyperf.config`** が `ConfigProvider` を読み込み、�
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | 抽象 | 実装 |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | デフォルトのコンストラクタ |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory`（デフォルト接続） |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | デフォルトのコンストラクタ |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory`（デフォルト接続） |
 
 **Controller / コンストラクタ注入**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-Hyperf は **`config/autoload/hashids.php`** を使い、設定は **`hashids`** キーの下に置きます。Laravel / Webman / ThinkPHP はフラット構造（ルート直下の `default` + `connections`）です。形式を混在させないでください。
+4 つのフレームワークで設定構造は一致し（ルート直下の `default` + `connections`）、異なるのはファイルパスだけです：Hyperf は **`config/autoload/hashids.php`**、Laravel / Webman / ThinkPHP は **`config/hashids.php`** を使います。
 
 ---
 

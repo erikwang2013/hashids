@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # Daftarkan Webman\Bootstrap
 ├── config/
 │   ├── hashids.php                            # Konfigurasi datar: Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Konfigurasi Hyperf (dibungkus kunci hashids)
+│   └── autoload/hashids.php                   # Konfigurasi Hyperf (struktur sama, path berbeda)
 ├── tests/
 │   ├── HashidsManagerTest.php                 # Perilaku inti
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ Enam kelompok kemampuan, semuanya berpusat pada satu inti yang sama:
 - **API encode/decode**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()`, lewat `__call()` bermuara ke koneksi default, tanpa perlu `connection()` eksplisit.
 - **Manajemen multi-koneksi**: beralih dengan `connection('alternative')`; dibangun secara lazy-load, satu koneksi hanya dibangun sekali.
 - **Adaptasi multi-framework**: Laravel memakai `ServiceProvider`, Webman memakai `Install` + `Bootstrap`, ThinkPHP memakai `Service`, Hyperf memakai `ConfigProvider`; masing-masing mengikuti kebiasaan framework-nya.
-- **Binding container**: trio `HashidsManager::class`, `'hashids'`, `Hashids\Hashids` (instance koneksi default), konsisten di keempat framework.
-- **Konfigurasi dan publikasi**: Laravel/Webman/ThinkPHP memakai struktur datar, Hyperf dibungkus kunci `hashids`.
+- **Binding container**: binding dua jalur — nama kelas (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) dan key string (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) — konsisten di keempat framework; dua key string terakhir sama dengan vinkla/hashids, memudahkan migrasi.
+- **Konfigurasi dan publikasi**: struktur keempat framework sama, semuanya **array datar** (`default` + `connections` di tingkat akar), hanya path file yang berbeda.
 - **Inti tanpa ketergantungan framework**: `new HashidsManager($config, $factory)` langsung bekerja; parameter `$config` toleran terhadap nilai non-array (dinormalisasi menjadi array kosong).
 
 ## Siklus Hidup
@@ -139,7 +139,7 @@ Sama dengan `config/hashids.php` di repositori:
 - `default`: nama koneksi default (misalnya `main`).
 - `connections`: nama koneksi => `salt`, `length`, opsional `alphabet`.
 
-> **Hyperf** memakai format file konfigurasi tersendiri (kunci terluar adalah `hashids`); lihat bagian Hyperf di bawah.
+> **Hyperf** path file konfigurasinya berbeda (`config/autoload/hashids.php`), tetapi strukturnya sama; lihat bagian Hyperf di bawah.
 
 ## Penggunaan Tanpa Framework
 
@@ -239,9 +239,9 @@ return [
 
 **Binding container**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids` (instance koneksi default)
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'` (instance koneksi default)
 
 **Contoh controller**
 
@@ -345,7 +345,9 @@ Composer memuat `ConfigProvider` melalui **`extra.hyperf.config`**, lalu mendaft
 
 Salin **`config/autoload/hashids.php`** dari dalam paket ke **`config/autoload/hashids.php`** proyek (atau gunakan perintah publikasi konfigurasi milik proyek).
 
-File tersebut harus memenuhi syarat: **kunci tingkat teratas `hashids`**, agar dapat dibaca oleh `ConfigInterface::get('hashids')`.
+File tersebut harus mengembalikan **array datar** (`default` + `connections` di tingkat akar).
+
+`ConfigFactory` Hyperf menggabungkan berdasarkan **nama file** (`Arr::set($config, 'hashids', require $file)`), jadi `config('hashids')` mengembalikan isi file itu sendiri — **jangan menambahkan lapisan `'hashids' =>` lagi**. Jika ditambahkan, `connections` menjadi tidak terjangkau dan saat mengambil koneksi akan melempar `Hashids connection [main] is not configured`.
 
 ```php
 <?php
@@ -353,13 +355,11 @@ File tersebut harus memenuhi syarat: **kunci tingkat teratas `hashids`**, agar d
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | Abstraksi | Implementasi |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | Konstruksi default |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory` (koneksi default) |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | Konstruksi default |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory` (koneksi default) |
 
 **Controller / injeksi konstruktor**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-Hyperf memakai **`config/autoload/hashids.php`** dengan konfigurasi di bawah kunci **`hashids`**; Laravel / Webman / ThinkPHP memakai struktur datar (`default` + `connections` di tingkat akar). Jangan mencampur kedua format itu.
+Struktur konfigurasi keempat framework sama (`default` + `connections` di tingkat akar); hanya path filenya yang berbeda: Hyperf memakai **`config/autoload/hashids.php`**, sedangkan Laravel / Webman / ThinkPHP memakai **`config/hashids.php`**.
 
 ---
 

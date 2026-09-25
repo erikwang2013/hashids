@@ -47,6 +47,8 @@ final class HashidsServiceProviderTest extends TestCase
             HashidsFactory::class,
             HashidsManager::class,
             'hashids',
+            'hashids.factory',
+            'hashids.connection',
             HashidsClient::class,
         ], $provider->provides());
     }
@@ -76,6 +78,8 @@ final class HashidsServiceProviderTest extends TestCase
         $app->shouldReceive('singleton')->with(HashidsFactory::class, Mockery::capture($factoryClosure));
         $app->shouldReceive('singleton')->with(HashidsManager::class, Mockery::capture($managerClosure));
         $app->shouldReceive('alias')->with(HashidsManager::class, 'hashids');
+        $app->shouldReceive('alias')->with(HashidsFactory::class, 'hashids.factory');
+        $app->shouldReceive('alias')->with(HashidsClient::class, 'hashids.connection');
         $app->shouldReceive('bind')->with(HashidsClient::class, Mockery::capture($clientClosure));
 
         (new HashidsServiceProvider($app))->register();
@@ -105,6 +109,8 @@ final class HashidsServiceProviderTest extends TestCase
         $app->shouldReceive('make')->with(HashidsFactory::class)->andReturn(new HashidsFactory());
         $app->shouldReceive('singleton');
         $app->shouldReceive('alias')->with(HashidsManager::class, 'hashids');
+        $app->shouldReceive('alias')->with(HashidsFactory::class, 'hashids.factory');
+        $app->shouldReceive('alias')->with(HashidsClient::class, 'hashids.connection');
         $app->shouldReceive('bind')->with(HashidsClient::class, Mockery::any());
 
         (new HashidsServiceProvider($app))->register();
@@ -134,6 +140,8 @@ final class HashidsServiceProviderTest extends TestCase
         $app->shouldReceive('singleton')->with(HashidsFactory::class, Mockery::any());
         $app->shouldReceive('singleton')->with(HashidsManager::class, Mockery::capture($managerClosure));
         $app->shouldReceive('alias')->with(HashidsManager::class, 'hashids');
+        $app->shouldReceive('alias')->with(HashidsFactory::class, 'hashids.factory');
+        $app->shouldReceive('alias')->with(HashidsClient::class, 'hashids.connection');
         $app->shouldReceive('bind')->with(HashidsClient::class, Mockery::any());
 
         (new HashidsServiceProvider($app))->register();

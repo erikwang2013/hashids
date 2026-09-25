@@ -85,19 +85,42 @@ final class InstallTest extends TestCase
         self::assertSame('<?php return ["custom" => true];', file_get_contents($dest));
     }
 
-    public function test_install_with_confirm_overwrites_existing_config(): void
+    /**
+     * 回归：Webman 的 support\Plugin::install() 恒以 install(true) 调用
+     * （见 webman-framework/src/support/Plugin.php:28），而 webman 项目的
+     * composer.json 把 post-package-update 也指向该方法 —— 所以每次
+     * `composer install` / `composer update` 都会走到这里。
+     *
+     * 一旦覆盖，用户的真实 salt 会被模板里的空 salt 顶掉：已发出的 hashid
+     * 全部 decode 失败，新生成的 hashid 因盐为空可被枚举。
+     */
+    public function test_install_with_confirm_never_overwrites_existing_config(): void
     {
         $dest = $this->base . '/config/hashids.php';
         mkdir(dirname($dest), 0755, true);
-        file_put_contents($dest, 'old-content');
+        file_put_contents($dest, "<?php return ['connections' => ['main' => ['salt' => 'real-secret']]];");
 
-        // 显式覆盖发布配置同样算重新打招呼。
+        $this->expectOutputString('');   // 未写入就不该打招呼
+
+        Install::install(true);
+
+        self::assertStringContainsString('real-secret', (string) file_get_contents($dest));
+    }
+
+    /**
+     * Webman 实际走的是 install(true)（不是默认的 false），首次安装必须照常写入。
+     */
+    public function test_install_with_confirm_writes_on_fresh_install(): void
+    {
         $this->expectOutputRegex('/' . preg_quote(Mascot::NAME, '/') . '/');
 
         Install::install(true);
 
-        self::assertNotSame('old-content', file_get_contents($dest));
-        self::assertStringContainsString('connections', (string) file_get_contents($dest));
+        self::assertFileExists($this->base . '/config/hashids.php');
+        self::assertStringContainsString(
+            'connections',
+            (string) file_get_contents($this->base . '/config/hashids.php')
+        );
     }
 
     public function test_uninstall_removes_plugin_config_dir(): void

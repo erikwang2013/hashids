@@ -28,6 +28,9 @@ final class ConfigProviderTest extends TestCase
             HashidsFactory::class => HashidsFactory::class,
             HashidsManager::class => HashidsManagerFactory::class,
             HashidsClient::class => HashidsClientFactory::class,
+            'hashids' => HashidsManagerFactory::class,
+            'hashids.factory' => HashidsFactory::class,
+            'hashids.connection' => HashidsClientFactory::class,
         ], $config['dependencies']);
     }
 

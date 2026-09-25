@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # Registra Webman\Bootstrap
 ├── config/
 │   ├── hashids.php                            # Config plana: Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Config de Hyperf (con la clave hashids envolviendo)
+│   └── autoload/hashids.php                   # Config de Hyperf (misma estructura plana, otra ruta)
 ├── tests/
 │   ├── HashidsManagerTest.php                 # Comportamiento del núcleo
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ Seis grupos de capacidades, todos alrededor del mismo núcleo:
 - **API de codificación y decodificación**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()`; pasan por `__call()` hasta la conexión por defecto, sin necesidad de un `connection()` explícito.
 - **Gestión multiconexión**: se cambia con `connection('alternative')`; la construcción es perezosa y cada conexión se construye una sola vez.
 - **Adaptación multientorno**: Laravel usa `ServiceProvider`, Webman usa `Install` + `Bootstrap`, ThinkPHP usa `Service` y Hyperf usa `ConfigProvider`, cada uno según las convenciones de su framework.
-- **Enlace en el contenedor**: el trío `HashidsManager::class`, `'hashids'` y `Hashids\Hashids` (instancia de la conexión por defecto), idéntico en los cuatro frameworks.
-- **Configuración y publicación**: Laravel/Webman/ThinkPHP usan una estructura plana y Hyperf la envuelve en la clave `hashids`.
+- **Enlace en el contenedor**: doble vía (nombre de clase + clave de tipo string), idéntica en los cuatro frameworks: las clases son `HashidsManager`, `HashidsFactory` y `Hashids\Hashids`, y las claves de tipo string son `'hashids'`, `'hashids.factory'` y `'hashids.connection'`; estas dos últimas tienen el mismo nombre que en vinkla/hashids, lo que facilita la migración.
+- **Configuración y publicación**: los cuatro frameworks comparten la misma estructura, un **array plano** (con `default` + `connections` en la raíz); solo cambia la ruta del archivo.
 - **Núcleo sin dependencias de frameworks**: funciona con `new HashidsManager($config, $factory)`, y el parámetro `$config` admite valores que no son arrays (se normalizan a un array vacío).
 
 ## Ciclo de vida
@@ -139,7 +139,7 @@ Igual que el `config/hashids.php` del repositorio:
 - `default`: nombre de la conexión por defecto (como `main`).
 - `connections`: nombre de conexión => `salt`, `length` y, opcionalmente, `alphabet`.
 
-> **Hyperf** usa un formato de archivo de configuración aparte (con la clave externa `hashids`); consulta la sección de Hyperf más abajo.
+> En **Hyperf** la **ruta** del archivo de configuración es distinta (`config/autoload/hashids.php`), pero la estructura es la misma; consulta la sección de Hyperf más abajo.
 
 ## Uso sin framework
 
@@ -239,9 +239,9 @@ return [
 
 **Enlace en el contenedor**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids` (instancia de la conexión por defecto)
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'` (instancia de la conexión por defecto)
 
 **Ejemplo de controlador**
 
@@ -345,7 +345,9 @@ El **`extra.hyperf.config`** de Composer carga `ConfigProvider`, que registra en
 
 Copia el **`config/autoload/hashids.php`** del paquete al **`config/autoload/hashids.php`** del proyecto (o usa el comando de publicación de configuración del proyecto).
 
-El archivo debe cumplir esto: **clave `hashids` en el nivel superior**, para que `ConfigInterface::get('hashids')` pueda leerla.
+El archivo debe devolver un **array plano** (con `default` + `connections` en la raíz).
+
+El `ConfigFactory` de Hyperf fusiona por **nombre de archivo** (`Arr::set($config, 'hashids', require $file)`), así que `config('hashids')` devuelve el contenido del archivo tal cual: **no añadas un nivel `'hashids' =>`**. Si lo añades, `connections` deja de ser accesible y al pedir una conexión se lanzará `Hashids connection [main] is not configured`.
 
 ```php
 <?php
@@ -353,13 +355,11 @@ El archivo debe cumplir esto: **clave `hashids` en el nivel superior**, para que
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | Abstracción | Implementación |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | Construcción por defecto |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory` (conexión por defecto) |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | Construcción por defecto |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory` (conexión por defecto) |
 
 **Inyección en Controller / constructor**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-Hyperf usa **`config/autoload/hashids.php`** y la configuración va bajo la clave **`hashids`**; Laravel / Webman / ThinkPHP usan una estructura plana (`default` + `connections` en la raíz). No mezcles los formatos.
+Los cuatro frameworks comparten la misma estructura de configuración (`default` + `connections` en la raíz); solo cambia la ruta del archivo: Hyperf usa **`config/autoload/hashids.php`** y Laravel / Webman / ThinkPHP usan **`config/hashids.php`**.
 
 ---
 

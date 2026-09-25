@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 612" role="img" aria-labelledby="featTitle featDesc">
   <title id="featTitle">erikwang2013/hashids — Design funcional</title>
-  <desc id="featDesc">Seis grupos de capacidades: API de codificação, gestão de múltiplas conexões, adaptação multi-framework, trio de bindings no container, configuração e publicação, e núcleo sem dependência de framework.</desc>
+  <desc id="featDesc">Seis grupos de capacidades: API de codificação, gestão de múltiplas conexões, adaptação multi-framework, bindings no container, configuração e publicação, e núcleo sem dependência de framework.</desc>
 
   <defs>
     <style>
@@ -79,8 +79,8 @@
 
   <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
   <text class="t-security" x="82" y="493" font-size="13">Configuração e publicação</text>
-  <text class="t-muted" x="82" y="520" font-size="10">Estrutura plana: Laravel / Webman / ThinkPHP</text>
-  <text class="t-muted" x="82" y="542" font-size="10">Estrutura com chave hashids: Hyperf</text>
+  <text class="t-muted" x="82" y="520" font-size="10">Estrutura plana: igual nos 4 frameworks</text>
+  <text class="t-muted" x="82" y="542" font-size="10">Caminho: config/hashids.php ou autoload/</text>
   <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · cópia via Install · publish</text>
 
   <!-- right column -->
@@ -91,8 +91,8 @@
   <text class="t-dim"   x="642" y="302" font-size="10">default ausente/inválido → fallback 'main'</text>
 
   <rect class="card" x="620" y="330" width="400" height="112" rx="12"/>
-  <text class="t-cloud" x="642" y="363" font-size="13">Trio de bindings no container</text>
-  <text class="t-muted" x="642" y="390" font-size="10">HashidsManager::class / 'hashids'</text>
+  <text class="t-cloud" x="642" y="363" font-size="13">Bindings no container</text>
+  <text class="t-muted" x="642" y="390" font-size="10">Binding por classe + chave 'hashids'</text>
   <text class="t-muted" x="642" y="412" font-size="10">Hashids\Hashids (instância da padrão)</text>
   <text class="t-dim"   x="642" y="432" font-size="10">Suporta injeção e container get()</text>
 

@@ -43,6 +43,12 @@ final class HashidsServiceProvider extends ServiceProvider implements Deferrable
         $this->app->alias(HashidsManager::class, 'hashids');
 
         $this->app->bind(HashidsClient::class, static fn ($app): HashidsClient => $app->make(HashidsManager::class)->connection());
+
+        // 对齐 vinkla/hashids 的容器键命名（其 HashidsServiceProvider 绑定
+        // 'hashids' / 'hashids.factory' / 'hashids.connection'，三者都再 alias 到对应类名）。
+        // 从 vinkla 迁移过来的代码里若有 app('hashids.factory') 之类的取用，靠这两条才不会断。
+        $this->app->alias(HashidsFactory::class, 'hashids.factory');
+        $this->app->alias(HashidsClient::class, 'hashids.connection');
     }
 
     /**
@@ -54,6 +60,8 @@ final class HashidsServiceProvider extends ServiceProvider implements Deferrable
             HashidsFactory::class,
             HashidsManager::class,
             'hashids',
+            'hashids.factory',
+            'hashids.connection',
             HashidsClient::class,
         ];
     }

@@ -121,6 +121,42 @@ final class HashidsManagerTest extends TestCase
         self::assertIsString($hash);
     }
 
+    public function test_set_default_connection_changes_subsequent_resolution(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'a',
+            'connections' => [
+                'a' => ['salt' => 'one', 'length' => 6],
+                'b' => ['salt' => 'two', 'length' => 6],
+            ],
+        ], new HashidsFactory());
+
+        $before = $manager->encode(42);
+
+        self::assertSame($manager, $manager->setDefaultConnection('b'));
+        self::assertSame('b', $manager->getDefaultConnection());
+        self::assertNotSame($before, $manager->encode(42));
+        self::assertSame($before, $manager->connection('a')->encode(42));
+    }
+
+    /**
+     * 与 Laravel 的 Manager 一致：设置时不校验连接是否存在，留到真正取用时暴露。
+     */
+    public function test_set_default_connection_does_not_validate_until_used(): void
+    {
+        $manager = new HashidsManager([
+            'default' => 'main',
+            'connections' => ['main' => ['salt' => 'x', 'length' => 4]],
+        ], new HashidsFactory());
+
+        $manager->setDefaultConnection('missing');
+
+        self::assertSame('missing', $manager->getDefaultConnection());
+
+        $this->expectException(InvalidArgumentException::class);
+        $manager->connection();
+    }
+
     public function test_explicit_empty_connection_name_throws(): void
     {
         $manager = new HashidsManager([

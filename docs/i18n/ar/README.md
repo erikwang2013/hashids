@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # تسجيل Webman\Bootstrap
 ├── config/
 │   ├── hashids.php                            # إعدادات مسطّحة: Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # إعدادات Hyperf (مغلّفة بالمفتاح hashids)
+│   └── autoload/hashids.php                   # إعدادات Hyperf (البنية مسطّحة، المسار مختلف)
 ├── tests/
 │   ├── HashidsManagerTest.php                 # السلوك الأساسي
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ hashids/
 - **واجهة الترميز وفكّه**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()` تمرّ عبر `__call()` إلى الاتصال الافتراضي دون حاجة إلى `connection()` صريحة.
 - **إدارة الاتصالات المتعددة**: التبديل عبر `connection('alternative')`؛ بناء عند الطلب، ولا يُبنى الاتصال نفسه إلا مرة واحدة.
 - **تكييف عدة أطر**: Laravel بـ `ServiceProvider`، وWebman بـ `Install` + `Bootstrap`، وThinkPHP بـ `Service`، وHyperf بـ `ConfigProvider`، كلٌّ وفق عُرف إطاره.
-- **ربط الحاوية**: ثلاثية `HashidsManager::class` و`'hashids'` و`Hashids\Hashids` (نسخة الاتصال الافتراضي)، متطابقة في الأطر الأربعة.
-- **الإعدادات والنشر**: بنية مسطّحة في Laravel/Webman/ThinkPHP، ومغلّفة بالمفتاح `hashids` في Hyperf.
+- **ربط الحاوية**: ربط على مسارين — أسماء الأصناف (`HashidsManager` و`HashidsFactory` و`Hashids\Hashids`) والمفاتيح النصية (`'hashids'` و`'hashids.factory'` و`'hashids.connection'`) — متطابق في الأطر الأربعة؛ والمفتاحان النصيان الأخيران باسم vinkla/hashids نفسه، ما يسهّل الانتقال.
+- **الإعدادات والنشر**: الأطر الأربعة متطابقة في البنية، وكلها **مصفوفة مسطّحة** (`default` + `connections` في الجذر)، والفرق في مسار الملف فقط.
 - **نواة بلا اعتماد على أي إطار**: تعمل بـ `new HashidsManager($config, $factory)`، والوسيط `$config` يتقبّل غير المصفوفات (يُطبَّع إلى مصفوفة فارغة).
 
 ## دورة الحياة
@@ -139,7 +139,7 @@ composer require erikwang2013/hashids
 - `default`: اسم الاتصال الافتراضي (مثل `main`).
 - `connections`: اسم الاتصال => `salt` و`length` و`alphabet` اختياريًا.
 
-> يستخدم **Hyperf** صيغة ملف إعدادات منفصلة (المفتاح الخارجي `hashids`)، انظر قسم Hyperf أدناه.
+> مسار ملف الإعدادات في **Hyperf** مختلف (`config/autoload/hashids.php`)، لكن البنية واحدة، انظر قسم Hyperf أدناه.
 
 ## الاستخدام بدون إطار
 
@@ -239,9 +239,9 @@ return [
 
 **ربط الحاوية**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids` (نسخة الاتصال الافتراضي)
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'` (نسخة الاتصال الافتراضي)
 
 **مثال في وحدة تحكّم**
 
@@ -345,7 +345,9 @@ app(HashidsManager::class)->connection('alternative')->encode(100);
 
 انسخ **`config/autoload/hashids.php`** من الحزمة إلى **`config/autoload/hashids.php`** في المشروع (أو استخدم أمر نشر الإعدادات في مشروعك).
 
-يجب أن يحقق الملف شرطًا واحدًا: **مفتاح `hashids` في المستوى الأعلى** ليقرأه `ConfigInterface::get('hashids')`.
+يجب أن يعيد الملف **مصفوفة مسطّحة** (`default` + `connections` في الجذر).
+
+يجمع `ConfigFactory` في Hyperf حسب **اسم الملف** (`Arr::set($config, 'hashids', require $file)`)، لذا فإن `config('hashids')` يعيد محتوى الملف نفسه — **لا تُضِف طبقة `'hashids' =>` أخرى**. وإن أضفتها يصبح `connections` غير قابل للوصول، ويُرمى عند جلب الاتصال الخطأ `Hashids connection [main] is not configured`.
 
 ```php
 <?php
@@ -353,13 +355,11 @@ app(HashidsManager::class)->connection('alternative')->encode(100);
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | التجريد | التنفيذ |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | البناء الافتراضي |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory` (الاتصال الافتراضي) |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | البناء الافتراضي |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory` (الاتصال الافتراضي) |
 
 **حقن في Controller / البانية**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-يستخدم Hyperf الملف **`config/autoload/hashids.php`** والإعدادات مغلّفة تحت المفتاح **`hashids`**؛ أما Laravel / Webman / ThinkPHP فتستخدم بنية مسطّحة (`default` + `connections` في الجذر). لا تخلط بين الصيغتين.
+بنية الإعدادات متطابقة في الأطر الأربعة (`default` + `connections` في الجذر)، والفرق في مسار الملف فقط: Hyperf يستخدم **`config/autoload/hashids.php`**، بينما Laravel / Webman / ThinkPHP فتستخدم **`config/hashids.php`**.
 
 ---
 

@@ -41,16 +41,24 @@ final class Install
 
         $hashidsDest = base_path() . '/config/hashids.php';
         $hashidsSrc = dirname(__DIR__) . '/config/hashids.php';
-        if (($confirm || !is_file($hashidsDest)) && is_file($hashidsSrc)) {
+
+        // NEVER overwrite an existing config — not even when $confirm is true.
+        //
+        // Webman always calls Install::install(true) (see support\Plugin::install),
+        // and its composer.json wires post-package-update to that same method, so
+        // an unconditional write would replace the user's real salt with the empty
+        // template salt on every `composer install` / `composer update`:
+        // already-issued hashids would stop decoding and new ones would be
+        // enumerable. $confirm therefore stays in the signature for Webman
+        // compatibility but must not gate this write. Users who want to reset the
+        // file delete it (or copy it from the package) themselves.
+        if (!is_file($hashidsDest) && is_file($hashidsSrc)) {
             $hashidsParent = dirname($hashidsDest);
             if (!is_dir($hashidsParent)) {
                 mkdir($hashidsParent, 0755, true);
             }
             copy($hashidsSrc, $hashidsDest);
 
-            // Only on first install (or an explicit confirm-overwrite) does the
-            // package actually say hello — re-running install on `composer update`
-            // stays quiet.
             echo Mascot::greet();
         }
     }

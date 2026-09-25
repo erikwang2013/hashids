@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # Регистрирует Webman\Bootstrap
 ├── config/
 │   ├── hashids.php                            # Плоские настройки: Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Настройки Hyperf (обёрнуты в ключ hashids)
+│   └── autoload/hashids.php                   # Настройки Hyperf (структура та же, путь другой)
 ├── tests/
 │   ├── HashidsManagerTest.php                 # Поведение ядра
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ hashids/
 - **API кодирования**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()` через `__call()` попадают в соединение по умолчанию, явный `connection()` не нужен.
 - **Управление соединениями**: переключение через `connection('alternative')`; ленивое создание — одно соединение строится один раз.
 - **Адаптеры фреймворков**: `ServiceProvider` в Laravel, `Install` + `Bootstrap` в Webman, `Service` в ThinkPHP, `ConfigProvider` в Hyperf — по идиомам каждого фреймворка.
-- **Привязки контейнера**: тройка `HashidsManager::class`, `'hashids'`, `Hashids\Hashids` (экземпляр соединения по умолчанию) — одинакова во всех четырёх фреймворках.
-- **Настройки и публикация**: плоская структура в Laravel/Webman/ThinkPHP, обёртка в ключ `hashids` в Hyperf.
+- **Привязки контейнера**: двойная схема — имена классов (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) и строковые ключи (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) — одинакова во всех четырёх фреймворках; два последних строковых ключа совпадают с vinkla/hashids, что упрощает миграцию.
+- **Настройки и публикация**: у всех четырёх фреймворков структура одинакова — **плоский массив** (корневые `default` + `connections`), различается только путь к файлу.
 - **Ядро без зависимостей**: достаточно `new HashidsManager($config, $factory)`, а `$config` может быть не массивом (нормализуется в пустой массив).
 
 ## Жизненный цикл
@@ -139,7 +139,7 @@ composer require erikwang2013/hashids
 - `default`: имя соединения по умолчанию (например, `main`).
 - `connections`: имя соединения => `salt`, `length`, опционально `alphabet`.
 
-> **Hyperf** использует отдельный формат файла (внешний ключ — `hashids`), см. раздел Hyperf ниже.
+> У **Hyperf** другой путь к файлу настроек (`config/autoload/hashids.php`), но структура та же, см. раздел Hyperf ниже.
 
 ## Использование без фреймворка
 
@@ -239,9 +239,9 @@ return [
 
 **Привязки контейнера**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids` (экземпляр соединения по умолчанию)
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'` (экземпляр соединения по умолчанию)
 
 **Пример контроллера**
 
@@ -345,7 +345,9 @@ Composer **`extra.hyperf.config`** загружает `ConfigProvider`, кото
 
 Скопируйте **`config/autoload/hashids.php`** из пакета в **`config/autoload/hashids.php`** проекта (или используйте команду публикации настроек).
 
-Файл должен содержать **верхний ключ `hashids`**, который читает `ConfigInterface::get('hashids')`.
+Файл должен возвращать **плоский массив** (корневые `default` + `connections`).
+
+`ConfigFactory` в Hyperf объединяет настройки **по имени файла** (`Arr::set($config, 'hashids', require $file)`), поэтому `config('hashids')` возвращает само содержимое файла — **не оборачивайте его ещё раз в `'hashids' =>`**. Иначе `connections` станет недоступен, и при получении соединения будет выброшено `Hashids connection [main] is not configured`.
 
 ```php
 <?php
@@ -353,13 +355,11 @@ Composer **`extra.hyperf.config`** загружает `ConfigProvider`, кото
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | Абстракция | Реализация |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | Обычное создание |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory` (соединение по умолчанию) |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | Обычное создание |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory` (соединение по умолчанию) |
 
 **Controller / внедрение через конструктор**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-В Hyperf используется **`config/autoload/hashids.php`** и настройки под ключом **`hashids`**; в Laravel / Webman / ThinkPHP структура плоская (корневые `default` + `connections`). Не смешивайте форматы.
+Структура настроек одинакова во всех четырёх фреймворках (корневые `default` + `connections`), различается только путь к файлу: в Hyperf — **`config/autoload/hashids.php`**, в Laravel / Webman / ThinkPHP — **`config/hashids.php`**.
 
 ---
 

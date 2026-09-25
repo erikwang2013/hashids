@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # Webman\Bootstrap रजिस्टर करना
 ├── config/
 │   ├── hashids.php                            # फ्लैट कॉन्फ़िग: Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Hyperf कॉन्फ़िग (बाहरी लेयर में hashids key)
+│   └── autoload/hashids.php                   # Hyperf कॉन्फ़िग (संरचना समान, पथ अलग)
 ├── tests/
 │   ├── HashidsManagerTest.php                 # कोर व्यवहार
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ hashids/
 - **encode/decode API**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()`, जो `__call()` से डिफ़ॉल्ट कनेक्शन पर पहुँचते हैं — अलग से `connection()` की ज़रूरत नहीं।
 - **मल्टी-कनेक्शन प्रबंधन**: `connection('alternative')` से स्विच; लेज़ी लोडिंग, एक ही कनेक्शन केवल एक बार बनता है।
 - **मल्टी-फ्रेमवर्क अडैप्टेशन**: Laravel में `ServiceProvider`, Webman में `Install` + `Bootstrap`, ThinkPHP में `Service`, Hyperf में `ConfigProvider` — हर एक अपने फ्रेमवर्क की परंपरा का पालन करता है।
-- **कंटेनर बाइंडिंग**: `HashidsManager::class`, `'hashids'`, `Hashids\Hashids` (डिफ़ॉल्ट कनेक्शन इंस्टेंस) — यह तिकड़ी चारों फ्रेमवर्क में एक जैसी है।
-- **कॉन्फ़िग और पब्लिश**: Laravel/Webman/ThinkPHP में फ्लैट संरचना, Hyperf में `hashids` key के अंदर लिपटी संरचना।
+- **कंटेनर बाइंडिंग**: क्लास नाम (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) और स्ट्रिंग key (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) — दोनों ट्रैक से बाइंडिंग, चारों फ्रेमवर्क में एक जैसी; आख़िरी दो स्ट्रिंग key vinkla/hashids के समान नाम की हैं, इसलिए माइग्रेशन आसान।
+- **कॉन्फ़िग और पब्लिश**: चारों फ्रेमवर्क की संरचना एक जैसी है — सब **फ्लैट ऐरे** (रूट लेवल पर `default` + `connections`), केवल फ़ाइल पथ अलग है।
 - **शून्य-फ्रेमवर्क-निर्भर कोर**: `new HashidsManager($config, $factory)` से सीधे काम चलता है; `$config` में नॉन-ऐरे भी स्वीकार्य है (खाली ऐरे में नॉर्मलाइज़ हो जाता है)।
 
 ## लाइफ़साइकिल
@@ -139,7 +139,7 @@ composer require erikwang2013/hashids
 - `default`: डिफ़ॉल्ट कनेक्शन का नाम (जैसे `main`)।
 - `connections`: कनेक्शन नाम => `salt`, `length`, वैकल्पिक `alphabet`।
 
-> **Hyperf** अलग कॉन्फ़िग फ़ाइल प्रारूप इस्तेमाल करता है (बाहरी key `hashids` है), नीचे Hyperf अनुभाग देखें।
+> **Hyperf** की कॉन्फ़िग फ़ाइल का **पथ** अलग है (`config/autoload/hashids.php`), पर **संरचना समान** है — नीचे Hyperf अनुभाग देखें।
 
 ## बिना फ्रेमवर्क के उपयोग
 
@@ -239,9 +239,9 @@ return [
 
 **कंटेनर बाइंडिंग**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids` (डिफ़ॉल्ट कनेक्शन इंस्टेंस)
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'` (डिफ़ॉल्ट कनेक्शन इंस्टेंस)
 
 **कंट्रोलर उदाहरण**
 
@@ -345,7 +345,9 @@ Composer का **`extra.hyperf.config`** `ConfigProvider` लोड करत�
 
 पैकेज के अंदर की **`config/autoload/hashids.php`** को प्रोजेक्ट की **`config/autoload/hashids.php`** में कॉपी करें (या प्रोजेक्ट का कॉन्फ़िग पब्लिश कमांड इस्तेमाल करें)।
 
-इस फ़ाइल में यह होना चाहिए: **टॉप-लेवल key `hashids`**, जिसे `ConfigInterface::get('hashids')` पढ़ता है।
+इस फ़ाइल को **फ्लैट ऐरे** लौटाना चाहिए (रूट लेवल पर `default` + `connections`)।
+
+Hyperf का `ConfigFactory` **फ़ाइल नाम** के आधार पर मर्ज करता है (`Arr::set($config, 'hashids', require $file)`), इसलिए `config('hashids')` ठीक फ़ाइल की सामग्री ही लौटाता है — **ऊपर एक और `'hashids' =>` लेयर न लगाएँ**। लगाने पर `connections` पहुँच से बाहर रह जाता है और कनेक्शन लेते समय `Hashids connection [main] is not configured` फेंका जाता है।
 
 ```php
 <?php
@@ -353,13 +355,11 @@ Composer का **`extra.hyperf.config`** `ConfigProvider` लोड करत�
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | एब्स्ट्रैक्ट | इम्प्लीमेंटेशन |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | डिफ़ॉल्ट कंस्ट्रक्ट |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory` (डिफ़ॉल्ट कनेक्शन) |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | डिफ़ॉल्ट कंस्ट्रक्ट |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory` (डिफ़ॉल्ट कनेक्शन) |
 
 **Controller / कंस्ट्रक्टर इंजेक्शन**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-Hyperf **`config/autoload/hashids.php`** इस्तेमाल करता है और कॉन्फ़िग **`hashids`** key के अंदर रहती है; Laravel / Webman / ThinkPHP फ्लैट संरचना इस्तेमाल करते हैं (रूट लेवल पर `default` + `connections`)। दोनों प्रारूपों को मिलाएँ नहीं।
+चारों फ्रेमवर्क की कॉन्फ़िग संरचना एक जैसी है (रूट लेवल पर `default` + `connections`), केवल फ़ाइल पथ अलग है: Hyperf **`config/autoload/hashids.php`** इस्तेमाल करता है, और Laravel / Webman / ThinkPHP **`config/hashids.php`**।
 
 ---
 

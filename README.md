@@ -65,7 +65,7 @@ hashids/
 │       └── bootstrap.php                      # 注册 Webman\Bootstrap
 ├── config/
 │   ├── hashids.php                            # 扁平配置：Laravel / Webman / ThinkPHP
-│   └── autoload/hashids.php                   # Hyperf 配置（外层套 hashids 键）
+│   └── autoload/hashids.php                   # Hyperf 配置（结构同扁平，路径不同）
 ├── tests/
 │   ├── HashidsManagerTest.php                 # 核心行为
 │   ├── HashidsFactoryTest.php
@@ -110,8 +110,8 @@ hashids/
 - **编解码 API**：`encode()` / `decode()` / `encodeHex()` / `decodeHex()`，经 `__call()` 落到默认连接，无需显式 `connection()`。
 - **多连接管理**：`connection('alternative')` 切换；懒加载构建，同一连接只构建一次。
 - **多框架适配**：Laravel 用 `ServiceProvider`、Webman 用 `Install` + `Bootstrap`、ThinkPHP 用 `Service`、Hyperf 用 `ConfigProvider`，各自遵循框架惯用法。
-- **容器绑定**：`HashidsManager::class`、`'hashids'`、`Hashids\Hashids`（默认连接实例）三件套，四框架一致。
-- **配置与发布**：Laravel/Webman/ThinkPHP 用扁平结构，Hyperf 用 `hashids` 键包裹。
+- **容器绑定**：类名（`HashidsManager`、`HashidsFactory`、`Hashids\Hashids`）与字符串键（`'hashids'`、`'hashids.factory'`、`'hashids.connection'`）双轨绑定，四框架一致；后两个字符串键与 vinkla/hashids 同名，便于迁移。
+- **配置与发布**：四个框架结构一致，都是**扁平数组**（根级 `default` + `connections`），只有文件路径不同。
 - **零框架依赖内核**：`new HashidsManager($config, $factory)` 即可工作，`$config` 入参容忍非数组（归一化为空数组）。
 
 ## 生命周期
@@ -139,7 +139,7 @@ composer require erikwang2013/hashids
 - `default`：默认连接名（如 `main`）。
 - `connections`：连接名 => `salt`、`length`、可选 `alphabet`。
 
-> **Hyperf** 使用单独的配置文件格式（外层键为 `hashids`），见下文 Hyperf 小节。
+> **Hyperf** 的配置文件路径不同（`config/autoload/hashids.php`），但结构相同，见下文 Hyperf 小节。
 
 ## 无框架用法
 
@@ -239,9 +239,9 @@ return [
 
 **容器绑定**
 
-- `Erikwang2013\Hashids\HashidsManager`
-- `'hashids'`
-- `Hashids\Hashids`（默认连接实例）
+- `Erikwang2013\Hashids\HashidsManager` / `'hashids'`
+- `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'`
+- `Hashids\Hashids` / `'hashids.connection'`（默认连接实例）
 
 **控制器示例**
 
@@ -345,7 +345,9 @@ Composer **`extra.hyperf.config`** 会载入 `ConfigProvider`，向容器注册 
 
 将扩展包内 **`config/autoload/hashids.php`** 复制到项目 **`config/autoload/hashids.php`**（或使用项目的配置发布命令）。
 
-该文件须满足：**顶层键 `hashids`**，供 `ConfigInterface::get('hashids')` 读取。
+该文件必须返回**扁平数组**（根级 `default` + `connections`）。
+
+Hyperf 的 `ConfigFactory` 按**文件名**归并（`Arr::set($config, 'hashids', require $file)`），所以 `config('hashids')` 返回的就是文件内容本身——**不要再套一层 `'hashids' =>`**。套了的话 `connections` 不可达，取连接时会抛 `Hashids connection [main] is not configured`。
 
 ```php
 <?php
@@ -353,13 +355,11 @@ Composer **`extra.hyperf.config`** 会载入 `ConfigProvider`，向容器注册 
 declare(strict_types=1);
 
 return [
-    'hashids' => [
-        'default' => 'main',
-        'connections' => [
-            'main' => [
-                'salt' => env('HASHIDS_SALT', ''),
-                'length' => (int) env('HASHIDS_LENGTH', 0),
-            ],
+    'default' => 'main',
+    'connections' => [
+        'main' => [
+            'salt' => env('HASHIDS_SALT', ''),
+            'length' => (int) env('HASHIDS_LENGTH', 0),
         ],
     ],
 ];
@@ -369,9 +369,9 @@ return [
 
 | 抽象 | 实现 |
 |------|------|
-| `Erikwang2013\Hashids\HashidsFactory` | 默认构造 |
-| `Erikwang2013\Hashids\HashidsManager` | `HashidsManagerFactory` |
-| `Hashids\Hashids` | `HashidsClientFactory`（默认连接） |
+| `Erikwang2013\Hashids\HashidsFactory` / `'hashids.factory'` | 默认构造 |
+| `Erikwang2013\Hashids\HashidsManager` / `'hashids'` | `HashidsManagerFactory` |
+| `Hashids\Hashids` / `'hashids.connection'` | `HashidsClientFactory`（默认连接） |
 
 **Controller / 构造函数注入**
 
@@ -404,7 +404,7 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-Hyperf 使用 **`config/autoload/hashids.php`** 且配置套在 **`hashids`** 键下；Laravel / Webman / ThinkPHP 使用扁平结构（根级 `default` + `connections`）。请勿混用格式。
+四个框架的配置结构一致（根级 `default` + `connections`），只有文件路径不同：Hyperf 用 **`config/autoload/hashids.php`**，Laravel / Webman / ThinkPHP 用 **`config/hashids.php`**。
 
 ---
 

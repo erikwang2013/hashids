@@ -1,0 +1,16 @@
+# Composer 分发包排除项。
+#
+# Packagist 的 dist 是 GitHub zipball，zipball 尊重 export-ignore。不排除的话
+# 每个使用者都要下载 ~803 KB（其中 docs/i18n 就占 660 KB），排除后约 44 KB。
+# 消费者只需要 src/、config/、composer.json、README、LICENSE。
+#
+# 为什么 docs/ 也能排除：Packagist 渲染 README 时会把相对路径改写成
+# rawcdn.githack.com/<repo>/HEAD/... —— 走的是**仓库**而不是 dist，
+# 所以多语言链接与文档配图在 Packagist 上照常显示。
+
+/tests            export-ignore
+/.github          export-ignore
+/docs             export-ignore
+/phpunit.xml.dist export-ignore
+/.gitattributes   export-ignore
+/.gitignore       export-ignore

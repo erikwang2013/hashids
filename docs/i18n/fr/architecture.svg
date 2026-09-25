@@ -118,7 +118,7 @@
   <rect class="c-cloud" x="60"  y="434" width="200" height="100" rx="10"/>
   <text class="t-primary" x="160" y="470" font-size="12" text-anchor="middle">Source de config</text>
   <text class="t-muted"   x="160" y="494" font-size="9"  text-anchor="middle">config/hashids.php</text>
-  <text class="t-dim"     x="160" y="514" font-size="9"  text-anchor="middle">(clé hashids pour Hyperf)</text>
+  <text class="t-dim"     x="160" y="514" font-size="9"  text-anchor="middle">(chemin différent pour Hyperf)</text>
 
   <rect class="c-mask"    x="330" y="434" width="380" height="100" rx="10"/>
   <rect class="c-backend" x="330" y="434" width="380" height="100" rx="10"/>

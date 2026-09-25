@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 612" role="img" aria-labelledby="featTitle featDesc">
   <title id="featTitle">erikwang2013/hashids 機能設計</title>
-  <desc id="featDesc">6つの機能グループ：エンコード/デコード API、マルチ接続管理、マルチフレームワーク適応、コンテナバインディング3点セット、設定と公開、フレームワーク非依存カーネル。</desc>
+  <desc id="featDesc">6つの機能グループ：エンコード/デコード API、マルチ接続管理、マルチフレームワーク適応、コンテナバインディング、設定と公開、フレームワーク非依存カーネル。</desc>
 
   <defs>
     <style>
@@ -79,8 +79,8 @@
 
   <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
   <text class="t-security" x="82" y="493" font-size="13">設定と公開</text>
-  <text class="t-muted" x="82" y="520" font-size="10">フラット構造：Laravel / Webman / ThinkPHP</text>
-  <text class="t-muted" x="82" y="542" font-size="10">hashids キーで包む構造：Hyperf</text>
+  <text class="t-muted" x="82" y="520" font-size="10">フラット構造：4 フレームワークで一致</text>
+  <text class="t-muted" x="82" y="542" font-size="10">パス：config/hashids.php または autoload/</text>
   <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · Install コピー · publish</text>
 
   <!-- right column -->
@@ -91,8 +91,8 @@
   <text class="t-dim"   x="642" y="302" font-size="10">default 欠落・不正時は 'main' にフォールバック</text>
 
   <rect class="card" x="620" y="330" width="400" height="112" rx="12"/>
-  <text class="t-cloud" x="642" y="363" font-size="13">コンテナバインディング3点セット</text>
-  <text class="t-muted" x="642" y="390" font-size="10">HashidsManager::class / 'hashids'</text>
+  <text class="t-cloud" x="642" y="363" font-size="13">コンテナバインディング</text>
+  <text class="t-muted" x="642" y="390" font-size="10">クラス名バインディング + 'hashids' などの文字列キー</text>
   <text class="t-muted" x="642" y="412" font-size="10">Hashids\Hashids（デフォルト接続のインスタンス）</text>
   <text class="t-dim"   x="642" y="432" font-size="10">コンストラクタ注入とコンテナ get() に対応</text>
 
