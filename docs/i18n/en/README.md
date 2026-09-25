@@ -39,6 +39,10 @@ This package, `erikwang2013/hashids`, is a **multi-framework integration layer f
 
 - Hashids is **encoding (encode/decode), not encryption**. Salt only makes guessing harder; do not use it for security-sensitive cases (such as tokens or passwords).
 - Once in production, changing the Salt or the Length invalidates every ID already encoded, so plan ahead and fix the configuration.
+- **An empty Salt means no protection at all**: with an empty salt the encoded output is enumerable (`encode(1)`, `encode(2)`, … predictable in sequence). Written as
+  `env('HASHIDS_SALT', '')`, a missing environment variable neither errors nor warns — it silently degrades to an empty salt, so confirm the salt is set before going live.
+- **On long-running frameworks (Webman / Hyperf), config changes require a process restart**: `HashidsManager` snapshots the configuration at construction time and caches connections permanently,
+  so editing `config/hashids.php` (or swapping the salt through a config center) does not take effect live — only after a `reload` or a restart.
 
 ## Project structure
 
@@ -131,6 +135,11 @@ Connections are built **on demand**: a process that only ever uses the default c
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **Runtime requirements**: the underlying `hashids/hashids` **must** have `ext-bcmath` or `ext-gmp` (one of the two), otherwise the very first encode throws
+> `RuntimeException: Missing math extension for Hashids`. Those two extensions are listed only under `suggest` inside `hashids/hashids`,
+> and Composer 2 no longer prints suggestions — so on a slim image (such as `php:8.3-fpm-alpine`) you get no warning at install time and it blows up at runtime,
+> with every request that touches Hashids returning a 500. This package's `composer.json` now lists both keys under `suggest`, but you still need to confirm the extension is enabled.
 
 ## Configuration structure (Laravel / Webman / ThinkPHP)
 

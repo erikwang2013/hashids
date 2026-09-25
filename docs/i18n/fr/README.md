@@ -39,6 +39,10 @@ Ce paquet `erikwang2013/hashids` est la **couche d'intégration PHP multi-framew
 
 - Hashids est un **encodage (encode/decode), pas un chiffrement**. Le Salt ne fait que compliquer les devinettes : à éviter sur tout cas sensible (token, mot de passe).
 - Modifier le Salt ou la Length après la mise en production invalide tous les ID déjà encodés : planifiez et figez la configuration à l'avance.
+- **Un Salt vide n'apporte aucune protection** : avec un salt vide, les résultats d'encodage sont énumérables (`encode(1)`, `encode(2)`… l'ordre est prévisible).
+  Écrit `env('HASHIDS_SALT', '')`, une variable oubliée ne lève ni erreur ni avertissement : le Salt retombe silencieusement à vide — vérifiez qu'il est bien défini avant la mise en production.
+- **Avec un framework à mémoire persistante (Webman / Hyperf), changer la configuration exige de redémarrer le processus** : `HashidsManager` fige la configuration à la construction et met les connexions en cache définitivement ;
+  modifier `config/hashids.php` (ou changer le Salt via un centre de configuration) ne s'applique pas à chaud — il faut un `reload` ou un redémarrage.
 
 ## Structure du projet
 
@@ -131,6 +135,11 @@ Les connexions sont **construites à la demande** : un processus qui n'appelle q
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **Environnement d'exécution** : le paquet sous-jacent `hashids/hashids` **exige** `ext-bcmath` ou `ext-gmp` (l'un des deux), sinon le premier encodage lève
+> `RuntimeException: Missing math extension for Hashids`. Ces deux extensions ne sont listées que dans le `suggest` de `hashids/hashids`, et Composer 2
+> n'affiche plus les suggest : sur une image allégée (comme `php:8.3-fpm-alpine`), l'installation ne signale donc rien et la panne ne survient qu'à l'exécution,
+> où chaque requête touchant Hashids renvoie une 500. Le `suggest` du `composer.json` de ce paquet a été complété avec ces deux clés, mais il vous reste à vérifier que les extensions sont activées.
 
 ## Structure de configuration (Laravel / Webman / ThinkPHP)
 

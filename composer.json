@@ -36,7 +36,9 @@
         "laravel/framework": "For Laravel integration.",
         "topthink/framework": "For ThinkPHP integration.",
         "hyperf/framework": "For Hyperf integration.",
-        "workerman/webman": "For Webman integration."
+        "workerman/webman": "For Webman integration.",
+        "ext-bcmath": "hashids/hashids 需要 bcmath 或 gmp 之一，否则首次编码抛 RuntimeException。",
+        "ext-gmp": "hashids/hashids 需要 bcmath 或 gmp 之一（两者二选一即可）。"
     },
     "autoload": {
         "psr-4": {

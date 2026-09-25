@@ -39,6 +39,10 @@
 
 - Hashids는 **암호화가 아니라 인코딩(encode/decode)** 입니다. Salt는 추측 난이도만 높일 뿐이며, 보안에 민감한 용도(token, 비밀번호 등)에는 쓸 수 없습니다.
 - 서비스 출시 후 Salt나 Length를 바꾸면 이미 인코딩된 모든 ID가 무효가 되므로, 미리 계획해 설정을 고정하세요.
+- **Salt 를 비워 두면 보호가 없습니다**: 빈 salt 에서는 인코딩 결과를 열거할 수 있습니다(`encode(1)`, `encode(2)`… 순서가 예측 가능).
+  `env('HASHIDS_SALT', '')` 로 쓸 때 환경 변수를 빠뜨려도 오류도 경고도 없이 조용히 빈 salt 로 내려갈 뿐이므로, 배포 전에 salt 가 설정되어 있는지 확인하세요.
+- **상주 메모리 프레임워크(Webman / Hyperf)에서는 설정을 바꿔도 프로세스를 재시작해야 합니다**: `HashidsManager` 는 생성 시점에 설정을 스냅샷하고
+  연결을 영구 캐시하므로, `config/hashids.php` 를 바꿔도(또는 설정 센터로 salt 를 교체해도) 핫 리로드되지 않고 `reload` 나 재시작 후에야 반영됩니다.
 
 ## 프로젝트 구조
 
@@ -131,6 +135,11 @@ hashids/
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **실행 환경**: 하위 `hashids/hashids` 에는 `ext-bcmath` 또는 `ext-gmp` 중 하나가 **반드시** 필요하며, 없으면 첫 인코딩에서
+> `RuntimeException: Missing math extension for Hashids` 가 발생합니다. 이 두 확장은 `hashids/hashids` 에서 `suggest` 에만 기재되어
+> 있는데 Composer 2 는 suggest 를 더 이상 출력하지 않습니다 — 그래서 슬림 이미지(예: `php:8.3-fpm-alpine`)에서는 설치 시점에
+> 아무 경고도 없다가 실행 시점에 터지고, Hashids 를 쓰는 모든 요청이 500 이 됩니다. 이 패키지 `composer.json` 의 `suggest` 에 두 키를 추가했지만, 확장이 활성화되어 있는지는 직접 확인해야 합니다.
 
 ## 설정 구조(Laravel / Webman / ThinkPHP)
 

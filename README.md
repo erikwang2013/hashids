@@ -39,6 +39,10 @@
 
 - Hashids 是 **编码（encode/decode）而非加密**。Salt 仅增加猜测难度，不可用于安全敏感场景（如 token、密码）。
 - 一旦上线后修改 Salt 或 Length，所有已编码的 ID 将变为无效，请提前规划并固定配置。
+- **Salt 留空等于没有保护**：空 salt 下编码结果可枚举（`encode(1)`、`encode(2)`… 顺序可预测）。写成
+  `env('HASHIDS_SALT', '')` 时，漏配环境变量既不报错也不告警，只是静默降级成空 salt —— 上线前请确认盐已设置。
+- **常驻内存框架（Webman / Hyperf）下改配置需要重启进程**：`HashidsManager` 在构造时快照配置并永久缓存连接，
+  改 `config/hashids.php`（或用配置中心换盐）不会热生效，`reload` 或重启后才会。
 
 ## 项目结构
 
@@ -131,6 +135,11 @@ hashids/
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **运行环境**：底层 `hashids/hashids` **必须**有 `ext-bcmath` 或 `ext-gmp`（二选一），否则第一次编码就会抛
+> `RuntimeException: Missing math extension for Hashids`。这两个扩展在 `hashids/hashids` 里只列于 `suggest`，
+> 而 Composer 2 已不再打印 suggest —— 于是在精简镜像（如 `php:8.3-fpm-alpine`）上安装期毫无提示、运行期才炸，
+> 且每个用到 Hashids 的请求都会 500。本包 `composer.json` 的 `suggest` 已补上这两个键，但仍需你确认扩展已启用。
 
 ## 配置结构（Laravel / Webman / ThinkPHP）
 

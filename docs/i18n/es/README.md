@@ -39,6 +39,10 @@ Este paquete, `erikwang2013/hashids`, es la **capa de integración multientorno 
 
 - Hashids es **codificación (encode/decode), no cifrado**. El Salt solo dificulta las conjeturas: no lo uses en escenarios sensibles para la seguridad (como tokens o contraseñas).
 - Si cambias el Salt o el Length una vez en producción, todos los ID ya codificados dejarán de ser válidos; planifícalo con antelación y fija la configuración.
+- **Un Salt vacío equivale a no tener protección**: con un salt vacío el resultado de la codificación es enumerable (`encode(1)`, `encode(2)`… el orden es predecible). Si lo escribes como
+  `env('HASHIDS_SALT', '')`, olvidar la variable de entorno no da error ni aviso: simplemente degrada en silencio a un salt vacío, así que confirma que el salt está configurado antes de publicar.
+- **En frameworks de memoria persistente (Webman / Hyperf), cambiar la configuración exige reiniciar el proceso**: `HashidsManager` toma una instantánea de la configuración al construirse y cachea las conexiones de forma permanente,
+  así que editar `config/hashids.php` (o cambiar el salt desde un centro de configuración) no surte efecto en caliente; solo tras un `reload` o un reinicio.
 
 ## Estructura del proyecto
 
@@ -131,6 +135,11 @@ Las conexiones se construyen **bajo demanda**: un proceso que solo usa la conexi
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **Entorno de ejecución**: el paquete base `hashids/hashids` **necesita** `ext-bcmath` o `ext-gmp` (uno de los dos), o la primera codificación lanzará
+> `RuntimeException: Missing math extension for Hashids`. Esas dos extensiones solo figuran en el `suggest` de `hashids/hashids`, y Composer 2 ya no imprime los suggest:
+> en una imagen minimalista (como `php:8.3-fpm-alpine`) la instalación no avisa de nada y el fallo aparece en ejecución, con un 500 en cada petición
+> que use Hashids. El `suggest` del `composer.json` de este paquete ya incluye esas dos claves, pero aun así debes confirmar que las extensiones están habilitadas.
 
 ## Estructura de configuración (Laravel / Webman / ThinkPHP)
 

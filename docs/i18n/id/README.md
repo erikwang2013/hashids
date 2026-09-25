@@ -39,6 +39,10 @@ Paket `erikwang2013/hashids` ini adalah **lapisan integrasi multi-framework PHP*
 
 - Hashids adalah **pengodean (encode/decode), bukan enkripsi**. Salt hanya menambah kesulitan menebak, dan tidak boleh dipakai untuk skenario yang sensitif terhadap keamanan (seperti token atau kata sandi).
 - Jika Salt atau Length diubah setelah aplikasi rilis, semua ID yang sudah dikodekan menjadi tidak valid; rencanakan dan tetapkan konfigurasinya sejak awal.
+- **Salt kosong berarti tanpa perlindungan**: dengan salt kosong, hasil pengodean dapat dienumerasi (`encode(1)`, `encode(2)`… urutannya bisa diprediksi). Bila ditulis
+  `env('HASHIDS_SALT', '')`, env var yang lupa diisi tidak memunculkan error maupun peringatan, hanya diam-diam turun menjadi salt kosong — pastikan salt sudah diisi sebelum rilis.
+- **Pada framework yang berjalan lama di memori (Webman / Hyperf), mengubah konfigurasi perlu restart proses**: `HashidsManager` mengambil snapshot konfigurasi saat konstruksi dan mencache koneksi selamanya,
+  mengubah `config/hashids.php` (atau mengganti salt lewat config center) tidak berlaku panas, baru berlaku setelah `reload` atau restart.
 
 ## Struktur Proyek
 
@@ -131,6 +135,11 @@ Koneksi dibangun **sesuai kebutuhan**: proses yang hanya memanggil koneksi defau
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **Lingkungan runtime**: `hashids/hashids` di lapisan bawah **wajib** memiliki `ext-bcmath` atau `ext-gmp` (pilih salah satu); jika tidak, pengodean pertama akan melempar
+> `RuntimeException: Missing math extension for Hashids`. Kedua ekstensi itu di `hashids/hashids` hanya tercantum di `suggest`,
+> sedangkan Composer 2 tidak lagi menampilkan suggest — maka pada image ramping (misalnya `php:8.3-fpm-alpine`) tidak ada peringatan saat instalasi dan baru meledak saat runtime,
+> dan setiap request yang memakai Hashids akan gagal 500. `suggest` di `composer.json` paket ini sudah ditambahi kedua key tersebut, tetapi Anda tetap perlu memastikan ekstensinya aktif.
 
 ## Struktur Konfigurasi (Laravel / Webman / ThinkPHP)
 

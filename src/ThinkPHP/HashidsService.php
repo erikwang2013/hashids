@@ -19,8 +19,10 @@ final class HashidsService extends ThinkService
 {
     public function register(): void
     {
-        // HashidsFactory is stateless — class-name binding lets the container
-        // resolve and share a single instance (matching Laravel's singleton).
+        // HashidsFactory 无状态、构造器无参：容器 make() 时构造一次并记入自己的
+        // instances，天然就是单实例。这行 bind 在 think-container v3 里其实**是空操作**
+        // （bind() 在 abstract == concrete 时直接跳过，不会写进 bind 表），保留只为语义
+        // 完整，并不产生绑定。不要依赖它做共享 —— 共享来自容器自身的实例记忆。
         $this->app->bind(HashidsFactory::class, HashidsFactory::class);
 
         $this->app->bind(HashidsManager::class, fn (): HashidsManager => new HashidsManager(

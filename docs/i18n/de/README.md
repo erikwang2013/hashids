@@ -39,6 +39,10 @@ Dieses Paket `erikwang2013/hashids` ist die **PHP-Integrationsschicht für mehre
 
 - Hashids ist **Kodierung (encode/decode), keine Verschlüsselung**. Das Salt erschwert nur das Erraten und taugt nicht für sicherheitskritische Zwecke (z. B. Token, Passwörter).
 - Werden Salt oder Length nach dem Livegang geändert, werden alle bereits kodierten IDs ungültig — planen Sie die Konfiguration vorab und halten Sie sie fest.
+- **Ein leeres Salt bedeutet keinen Schutz**: Bei leerem Salt ist das Kodierungsergebnis aufzählbar (`encode(1)`, `encode(2)`… die Reihenfolge ist vorhersagbar). Bei
+  `env('HASHIDS_SALT', '')` führt eine vergessene Umgebungsvariable weder zu einem Fehler noch zu einer Warnung, sondern still zu einem leeren Salt — prüfen Sie vor dem Livegang, dass das Salt gesetzt ist.
+- **Unter dauerhaft laufenden Frameworks (Webman / Hyperf) erfordert eine Konfigurationsänderung einen Prozessneustart**: `HashidsManager` macht beim Konstruieren einen Schnappschuss der Konfiguration und cached Verbindungen dauerhaft;
+   eine Änderung an `config/hashids.php` (oder ein Salt-Wechsel über ein Config-Center) wird nicht heiß wirksam, sondern erst nach `reload` oder Neustart.
 
 ## Projektstruktur
 
@@ -131,6 +135,11 @@ Verbindungen werden **bei Bedarf aufgebaut**: Ein Prozess, der nur die Standardv
 ```bash
 composer require erikwang2013/hashids
 ```
+
+> **Laufzeitumgebung**: Das zugrunde liegende `hashids/hashids` **benötigt** `ext-bcmath` oder `ext-gmp` (eines von beiden), sonst wirft bereits die erste Kodierung
+> `RuntimeException: Missing math extension for Hashids`. Beide Erweiterungen sind in `hashids/hashids` nur unter `suggest` aufgeführt,
+> und Composer 2 gibt suggest nicht mehr aus — auf schlanken Images (etwa `php:8.3-fpm-alpine`) gibt es daher bei der Installation keinen Hinweis und erst zur Laufzeit knallt es,
+> und jede Anfrage, die Hashids nutzt, endet mit 500. Das `suggest` in der `composer.json` dieses Pakets wurde um beide Schlüssel ergänzt, dennoch müssen Sie bestätigen, dass die Erweiterungen aktiviert sind.
 
 ## Konfigurationsstruktur (Laravel / Webman / ThinkPHP)
 
