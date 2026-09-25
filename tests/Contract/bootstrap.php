@@ -38,3 +38,19 @@ foreach (['Webman\Bootstrap', 'think\Service', 'Hyperf\Contract\ConfigInterface'
         exit(1);
     }
 }
+
+// Hyperf 的 DI 容器解析要经过协程上下文（hyperf/context → hyperf/engine），
+// 缺 Swoole/Swow 时会以 Class "Swoole\Coroutine" not found 失败 —— 报错栈指向
+// hyperf 内部，看不出根因。这里提前拦一道，把话说清楚。
+// 真实 Hyperf 部署必然带其中之一，所以这是环境前提，不是本包的依赖。
+if (!extension_loaded('swoole') && !extension_loaded('swow') && !extension_loaded('openswoole')) {
+    fwrite(STDERR, implode("\n", [
+        '契约测试里 Hyperf 那部分需要协程扩展（swoole 或 swow），当前两个都没有。',
+        '缺了它，hyperf/di 的 Container::get() 会在 hyperf/engine 内部抛',
+        '  Error: Class "Swoole\Coroutine" not found',
+        'CI 的 contract 作业通过 setup-php 的 extensions: swoole 安装；',
+        '本地请装 swoole，或用 CONTRACT_VENDOR 指向装了扩展的环境。',
+        '',
+    ]) . "\n");
+    exit(1);
+}
