@@ -1,12 +1,15 @@
 {
     "name": "erikwang2013/hashids",
-    "description": "Hashids integration for Laravel, Webman, ThinkPHP, and Hyperf (multi-connection, API aligned with vinkla/hashids).",
+    "description": "Hashids integration for Laravel, Webman, ThinkPHP, Hyperf, Yii 2, and Yii 3 (multi-connection, API aligned with vinkla/hashids).",
     "keywords": [
         "hashids",
         "laravel",
         "webman",
         "thinkphp",
         "hyperf",
+        "yii",
+        "yii2",
+        "yii3",
         "erikwang2013"
     ],
     "type": "library",
@@ -37,6 +40,8 @@
         "topthink/framework": "For ThinkPHP integration.",
         "hyperf/framework": "For Hyperf integration.",
         "workerman/webman": "For Webman integration.",
+        "yiisoft/yii2": "For Yii 2 integration.",
+        "yiisoft/di": "For Yii 3 integration (Yiisoft\\Di\\Container).",
         "ext-bcmath": "hashids/hashids 需要 bcmath 或 gmp 之一，否则首次编码抛 RuntimeException。",
         "ext-gmp": "hashids/hashids 需要 bcmath 或 gmp 之一（两者二选一即可）。"
     },

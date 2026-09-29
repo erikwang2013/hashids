@@ -89,11 +89,11 @@ jobs:
       - name: Run Laravel contract tests
         run: vendor/bin/phpunit --configuration phpunit.contract-laravel.xml
 
-  # 契约测试：把四个适配器放到**真实框架**面前跑，而不是手写替身。
+  # 契约测试：把六个适配器放到**真实框架**面前跑，而不是手写替身。
   #
   # 为什么单独一个作业：真框架包装不进 require-dev —— workerman/webman-framework 要求
-  # PHP >= 8.1、hyperf/* 要求 >= 8.2，而本包声明 `php: ^8.0`。写进去会让 8.0 的作业
-  # 直接解析失败。所以只在 8.2 上按需安装并跑 tests/Contract。
+  # PHP >= 8.1、hyperf/* 要求 >= 8.2、yiisoft/di 要求 >= 8.1，而本包声明 `php: ^8.0`。
+  # 写进去会让 8.0 的作业直接解析失败。所以只在 8.2 上按需安装并跑 tests/Contract。
   #
   # 这一层要守住的问题类型：Hyperf 的配置多包一层导致整个集成不可用，是「适配器约定
   # 从未对着真框架验过」的典型 —— 当时的测试全用手写替身，替身按同一个错误假设写的，
@@ -120,6 +120,22 @@ jobs:
       - name: Install package dependencies
         run: composer update --prefer-dist --no-progress --no-interaction
 
+      # 这两条只在契约作业里写，**不进**根 composer.json —— 两个原因：
+      #
+      #   1. yiisoft/yii2 的 2.0.x 线把 bower-asset/jquery 列为硬依赖，而它只在
+      #      asset-packagist.org 上。仓库没有这个源时 composer 不会报错，而是**静默**
+      #      退到 2.2.x-dev（那条分支不要 bower-asset），于是契约测试验的是一个开发分支。
+      #   2. 它们是 root-only 配置，写进本包 composer.json 对使用者毫无作用；而仓库级
+      #      repositories 会让**主矩阵每个作业**都去查 asset-packagist —— 那站点一慢，
+      #      整条 CI 跟着慢。范围收在这一个作业里。
+      #
+      # 另：yiisoft/yii2-composer 是 composer 插件，默认被 allow-plugins 挡下并直接报错
+      # （Yii 2 官方应用模板里也是显式放行的）。
+      - name: Configure composer for Yii 2
+        run: |
+          composer config repositories.asset-packagist composer https://asset-packagist.org
+          composer config allow-plugins.yiisoft/yii2-composer true
+
       - name: Install real frameworks
         run: >
           composer require --dev --no-interaction --with-all-dependencies
@@ -128,6 +144,8 @@ jobs:
           hyperf/contract:^3.0
           hyperf/config:^3.0
           hyperf/di:^3.0
+          yiisoft/yii2:^2.0
+          yiisoft/di:^1.4
 
       - name: Show resolved versions
         run: composer show --direct

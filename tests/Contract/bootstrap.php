@@ -18,14 +18,45 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 
+// Yii 2 的全局 Yii 类**不在** composer autoload 里：yiisoft/yii2 的 composer.json 只声明了
+// psr-4 "yii\\"，既没有 files 也没有 classmap。真实应用的入口脚本（web/index.php、控制台
+// 入口）都必须显式 require vendor/yiisoft/yii2/Yii.php —— 该文件顺带还会
+// spl_autoload_register 并创建 Yii::$container。这里照做。
+//
+// 不这么做的话症状很误导：yii\base\* 走 psr-4 自动加载得好好的，只有全局 Yii 找不到，
+// 报错栈指向本包的 Bootstrap.php，看不出根因。
+$yiiEntry = dirname(__DIR__, 2) . '/vendor/yiisoft/yii2/Yii.php';
+if (is_file($yiiEntry)) {
+    require_once $yiiEntry;
+}
+
+// Yii 3（yiisoft/di 等）不需要这一步：它的类全部走 composer autoload，也没有全局 Yii 类。
+// 上面那段的麻烦是 Yii 2 独有的。
+
 // 真框架缺席时明确报错，而不是让测试以莫名其妙的 fatal 结束。
-foreach (['Webman\Bootstrap', 'think\Service', 'Hyperf\Contract\ConfigInterface', 'support\Container'] as $symbol) {
+$symbols = [
+    'Webman\Bootstrap',
+    'think\Service',
+    'Hyperf\Contract\ConfigInterface',
+    'support\Container',
+    'yii\base\BootstrapInterface',
+    'Yii',
+    'Yiisoft\Di\ServiceProviderInterface',
+];
+foreach ($symbols as $symbol) {
     if (!class_exists($symbol) && !interface_exists($symbol)) {
         fwrite(STDERR, sprintf(
             "契约测试需要真实框架符号 [%s]，当前 vendor 里没有。\n" .
             "CI 由 contract 作业安装；本地请照它做：composer require --dev " .
             "topthink/framework:^8.0 workerman/webman-framework:^2.0 " .
-            "hyperf/contract:^3.0 hyperf/config:^3.0 hyperf/di:^3.0 orchestra/testbench:^9.0\n",
+            "hyperf/contract:^3.0 hyperf/config:^3.0 hyperf/di:^3.0 " .
+            "orchestra/testbench:^9.0 yiisoft/yii2:^2.0 yiisoft/di:^1.4\n" .
+            "\n" .
+            "其中 yiisoft/yii2 还要两条 composer 配置（CI 的 contract 作业里有同样的两行）：\n" .
+            "  composer config repositories.asset-packagist composer https://asset-packagist.org\n" .
+            "  composer config allow-plugins.yiisoft/yii2-composer true\n" .
+            "缺 asset-packagist 时 composer 会**静默**退到 2.2.x-dev —— 2.0.x 线要求\n" .
+            "bower-asset/jquery，只有该仓库提供；于是契约测试实际验的是一个开发分支。\n",
             $symbol
         ));
         exit(1);
