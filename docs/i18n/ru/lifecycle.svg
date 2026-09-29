@@ -93,7 +93,7 @@
   <rect class="c-backend" x="415" y="118" width="250" height="82" rx="10"/>
   <text class="t-dim"     x="431" y="137" font-size="9">02</text>
   <text class="t-primary" x="540" y="163" font-size="12" text-anchor="middle">Автоподключение / хуки</text>
-  <text class="t-muted"   x="540" y="183" font-size="9"  text-anchor="middle">автопоиск Laravel · хук установки Webman</text>
+  <text class="t-muted"   x="540" y="183" font-size="8"  text-anchor="middle">автопоиск Laravel · хук Webman · Yii вручную</text>
 
   <rect class="c-mask"  x="770" y="118" width="250" height="82" rx="10"/>
   <rect class="c-cloud" x="770" y="118" width="250" height="82" rx="10"/>

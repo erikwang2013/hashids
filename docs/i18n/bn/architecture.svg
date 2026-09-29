@@ -86,34 +86,44 @@
   <rect class="c-mask"     x="760" y="118" width="260" height="56" rx="10"/>
   <rect class="c-frontend" x="760" y="118" width="260" height="56" rx="10"/>
   <text class="t-primary" x="890" y="142" font-size="12" text-anchor="middle">__construct(HashidsManager $m)</text>
-  <text class="t-muted"   x="890" y="162" font-size="9"  text-anchor="middle">কনস্ট্রাক্টর ইনজেকশন</text>
+  <text class="t-muted"   x="890" y="162" font-size="9"  text-anchor="middle">কনস্ট্রাক্টর ইনজেকশন (ছয় ফ্রেমওয়ার্ক)</text>
 
   <!-- L2 ফ্রেমওয়ার্ক অ্যাডাপ্টার লেয়ার -->
-  <rect class="c-mask"    x="60"  y="262" width="216" height="84" rx="10"/>
-  <rect class="c-backend" x="60"  y="262" width="216" height="84" rx="10"/>
-  <text class="t-primary" x="168" y="294" font-size="12" text-anchor="middle">Laravel</text>
-  <text class="t-muted"   x="168" y="316" font-size="9"  text-anchor="middle">HashidsServiceProvider</text>
-  <text class="t-dim"     x="168" y="338" font-size="8"  text-anchor="middle">singleton · alias · publish</text>
+  <rect class="c-mask"    x="60  " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="60  " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="135" y="294" font-size="12" text-anchor="middle">Laravel</text>
+  <text class="t-muted"   x="135" y="316" font-size="9"  text-anchor="middle">HashidsServiceProvider</text>
+  <text class="t-dim"     x="135" y="338" font-size="7"  text-anchor="middle">singleton · alias · publish</text>
 
-  <rect class="c-mask"    x="308" y="262" width="216" height="84" rx="10"/>
-  <rect class="c-backend" x="308" y="262" width="216" height="84" rx="10"/>
-  <text class="t-primary" x="416" y="294" font-size="12" text-anchor="middle">Webman</text>
-  <text class="t-muted"   x="416" y="316" font-size="9"  text-anchor="middle">Install + Bootstrap</text>
-  <text class="t-dim"     x="416" y="338" font-size="8"  text-anchor="middle">ইনস্টলে কপি · কন্টেইনার</text>
+  <rect class="c-mask"    x="222 " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="222 " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="297" y="294" font-size="12" text-anchor="middle">Webman</text>
+  <text class="t-muted"   x="297" y="316" font-size="9"  text-anchor="middle">Install + Bootstrap</text>
+  <text class="t-dim"     x="297" y="338" font-size="7"  text-anchor="middle">ইনস্টলে কপি · কন্টেইনার</text>
 
-  <rect class="c-mask"    x="556" y="262" width="216" height="84" rx="10"/>
-  <rect class="c-backend" x="556" y="262" width="216" height="84" rx="10"/>
-  <text class="t-primary" x="664" y="294" font-size="12" text-anchor="middle">ThinkPHP</text>
-  <text class="t-muted"   x="664" y="316" font-size="9"  text-anchor="middle">HashidsService</text>
-  <text class="t-dim"     x="664" y="338" font-size="8"  text-anchor="middle">think\Service বাইন্ডিং</text>
+  <rect class="c-mask"    x="384 " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="384 " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="459" y="294" font-size="12" text-anchor="middle">ThinkPHP</text>
+  <text class="t-muted"   x="459" y="316" font-size="9"  text-anchor="middle">HashidsService</text>
+  <text class="t-dim"     x="459" y="338" font-size="7"  text-anchor="middle">think\Service বাইন্ডিং</text>
 
-  <rect class="c-mask"    x="804" y="262" width="216" height="84" rx="10"/>
-  <rect class="c-backend" x="804" y="262" width="216" height="84" rx="10"/>
-  <text class="t-primary" x="912" y="294" font-size="12" text-anchor="middle">Hyperf</text>
-  <text class="t-muted"   x="912" y="316" font-size="9"  text-anchor="middle">ConfigProvider</text>
-  <text class="t-dim"     x="912" y="338" font-size="8"  text-anchor="middle">ডিপেন্ডেন্সি ম্যাপিং · publish</text>
+  <rect class="c-mask"    x="546 " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="546 " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="621" y="294" font-size="12" text-anchor="middle">Hyperf</text>
+  <text class="t-muted"   x="621" y="316" font-size="9"  text-anchor="middle">ConfigProvider</text>
+  <text class="t-dim"     x="621" y="338" font-size="7"  text-anchor="middle">ডিপেন্ডেন্সি ম্যাপিং · publish</text>
 
-  <!-- L3 কোর লেয়ার -->
+  <rect class="c-mask"    x="708 " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="708 " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="783" y="294" font-size="12" text-anchor="middle">Yii 2</text>
+  <text class="t-muted"   x="783" y="316" font-size="9"  text-anchor="middle">Bootstrap + Component</text>
+  <text class="t-dim"     x="783" y="338" font-size="7"  text-anchor="middle">কন্টেইনার · অ্যাপ কম্পোনেন্ট</text>
+
+  <rect class="c-mask"    x="870 " y="262" width="150" height="84" rx="10"/>
+  <rect class="c-backend" x="870 " y="262" width="150" height="84" rx="10"/>
+  <text class="t-primary" x="945" y="294" font-size="12" text-anchor="middle">Yii 3</text>
+  <text class="t-muted"   x="945" y="316" font-size="9"  text-anchor="middle">ServiceProvider</text>
+  <text class="t-dim"     x="945" y="338" font-size="7"  text-anchor="middle">definitions · সিঙ্গলটন</text>
   <rect class="c-mask"  x="60"  y="434" width="200" height="100" rx="10"/>
   <rect class="c-cloud" x="60"  y="434" width="200" height="100" rx="10"/>
   <text class="t-primary" x="160" y="470" font-size="12" text-anchor="middle">কনফিগ সোর্স</text>

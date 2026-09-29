@@ -8,7 +8,7 @@
 
 <p align="center"><strong>Hashy</strong> — the project mascot, with its signature <code>#</code> on its chest</p>
 
-Turn database auto-increment IDs into short, unguessable strings — **one API that runs on Laravel, Webman, ThinkPHP and Hyperf alike**.
+Turn database auto-increment IDs into short, unguessable strings — **one API that runs on Laravel, Webman, ThinkPHP, Hyperf, Yii 2 and Yii 3 alike**.
 
 Built on [`hashids/hashids`](https://github.com/vinkla/hashids) v5; the configuration and usage follow [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids) (multiple connections, default connection, `HashidsManager` + factory), so it is a drop-in replacement.
 
@@ -20,11 +20,11 @@ This package, `erikwang2013/hashids`, is a **multi-framework integration layer f
 
 **Core features:**
 
-- **Multi-framework**: one API serves Laravel, Webman, ThinkPHP and Hyperf at once, so migration costs next to nothing.
+- **Multi-framework**: one API serves Laravel, Webman, ThinkPHP, Hyperf, Yii 2 and Yii 3 at once, so migration costs next to nothing.
 - **Multiple connections**: a single application can configure several Salt/Length combinations side by side (say, different salts for user IDs and order IDs), switched with `connection('xxx')`.
 - **No framework dependency**: usable standalone without any particular framework — `new HashidsManager($config, $factory)` is all it takes.
 - **Aligned with vinkla/hashids**: under Laravel the Facade, the container bindings and the `config/hashids.php` format all match vinkla/hashids, so it is a drop-in replacement.
-- **Framework-native style**: each framework integration follows that framework's own idioms — Laravel uses a ServiceProvider + Facade, Webman a Plugin + Bootstrap, ThinkPHP a Service, Hyperf a ConfigProvider.
+- **Framework-native style**: each framework integration follows that framework's own idioms — Laravel uses a ServiceProvider + Facade, Webman a Plugin + Bootstrap, ThinkPHP a Service, Hyperf a ConfigProvider, Yii 2 a Bootstrap + application component, Yii 3 a ServiceProvider.
 
 **Use cases:**
 
@@ -64,6 +64,11 @@ hashids/
 │   │   ├── ConfigProvider.php                 # dependency mapping + config publishing
 │   │   ├── HashidsManagerFactory.php
 │   │   └── HashidsClientFactory.php
+│   ├── Yii2/
+│   │   ├── Bootstrap.php                      # BootstrapInterface: registers Yii::$container
+│   │   └── Component.php                      # application component: Yii::$app->hashids
+│   ├── Yii3/
+│   │   └── ServiceProvider.php                # ServiceProviderInterface: returns six definitions
 │   └── config/plugin/erikwang2013/hashids/    # Webman plugin skeleton (copied into the project on install)
 │       ├── app.php                            # the enable switch
 │       └── bootstrap.php                      # registers Webman\Bootstrap
@@ -75,8 +80,9 @@ hashids/
 │   ├── HashidsFactoryTest.php
 │   ├── InstallTest.php
 │   ├── MascotTest.php                         # the mascot: glyph alignment and greeting
-│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/   # per-framework adapter tests
+│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/ · Yii2/ · Yii3/   # per-framework adapter tests
 │   ├── Config/PluginConfigTest.php
+│   ├── Contract/                              # real-framework contract tests (separate CI job, see below)
 │   └── Support/FrameworkStubs.php             # framework class stubs for tests
 ├── docs/
 │   ├── mascot.svg                             # the mascot, Hashy
@@ -103,7 +109,7 @@ hashids/
 | Core layer | Multi-connection management and instance construction, **with no framework dependency** | `src/HashidsManager.php`, `src/HashidsFactory.php` |
 | Underlying dependency | The actual encode/decode implementation | `hashids/hashids` |
 
-The core layer is the heart of the package: `HashidsManager` holds the configuration, `connection($name)` builds and caches a connection on demand, and `__call()` forwards connection-less method calls to the default connection; `HashidsFactory::make()` is the only place that constructs a `Hashids\Hashids`. The adapter classes for all four frameworks total roughly 250 lines (including the Facade and the two Hyperf factories) — all they do is wire the core into their respective containers.
+The core layer is the heart of the package: `HashidsManager` holds the configuration, `connection($name)` builds and caches a connection on demand, and `__call()` forwards connection-less method calls to the default connection; `HashidsFactory::make()` is the only place that constructs a `Hashids\Hashids`. The adapter classes for all six frameworks total roughly 490 lines (including the Facade, the two Hyperf factories and the Yii 2 application component) — all they do is wire the core into their respective containers.
 
 ## Feature design
 
@@ -113,9 +119,9 @@ Six capability groups, all built around the same core:
 
 - **Encode/decode API**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()`, reaching the default connection through `__call()`, with no explicit `connection()` needed.
 - **Multi-connection management**: switch with `connection('alternative')`; built lazily, so each connection is constructed only once.
-- **Multi-framework adapters**: Laravel uses a `ServiceProvider`, Webman an `Install` + `Bootstrap`, ThinkPHP a `Service`, Hyperf a `ConfigProvider`, each following its framework's idioms.
-- **Container bindings**: class names (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) and string keys (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) are bound in tandem, identically across all four frameworks; the latter two string keys share their names with vinkla/hashids, which eases migration.
-- **Configuration and publishing**: all four frameworks share the same structure — a **flat array** (root-level `default` + `connections`) — and only the file path differs.
+- **Multi-framework adapters**: Laravel uses a `ServiceProvider`, Webman an `Install` + `Bootstrap`, ThinkPHP a `Service`, Hyperf a `ConfigProvider`, Yii 2 a `BootstrapInterface` + application component, Yii 3 a `ServiceProviderInterface`, each following its framework's idioms.
+- **Container bindings**: class names (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) and string keys (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) are bound in tandem, identically across all six frameworks; the latter two string keys share their names with vinkla/hashids, which eases migration.
+- **Configuration and publishing**: all six frameworks share the same config **shape** — a **flat array** (root-level `default` + `connections`) — and differ only in where it lives: Laravel / Webman / ThinkPHP use `config/hashids.php`, Hyperf `config/autoload/hashids.php`, Yii 2 the `params['hashids']` entry of `config/params.php`, and Yii 3 hands it straight to the `ServiceProvider` constructor (the framework prescribes no config file).
 - **Framework-free core**: `new HashidsManager($config, $factory)` just works, and `$config` tolerates non-array input (normalized to an empty array).
 
 ## Lifecycle
@@ -124,7 +130,7 @@ Six capability groups, all built around the same core:
 
 | Stage | What happens |
 |------|-----------|
-| **Install** | `composer require` pulls the package → Laravel auto-discovery / the Webman install hook copies the plugin skeleton → `salt` / `length` / `alphabet` are loaded |
+| **Install** | `composer require` pulls the package → Laravel auto-discovery / the Webman install hook copies the plugin skeleton / Yii 2 registers the `Bootstrap` or the component in the application config / Yii 3 registers the `ServiceProvider` in `ContainerConfig::withProviders()` → `salt` / `length` / `alphabet` are loaded |
 | **Runtime** | The container resolves `HashidsManager` → `encode()` / `decode()` → `__call()` forwards to `connection($name)` → **a cache hit is reused as is, and only a miss calls `HashidsFactory::make()` to build and store it in `$connections`** → a short ID or the original number comes back |
 | **Uninstall** | `composer remove` triggers `Install::uninstall()`, removing `config/plugin/erikwang2013/hashids`; **`config/hashids.php` is kept**, and whether to clean it up is up to you |
 
@@ -141,7 +147,7 @@ composer require erikwang2013/hashids
 > and Composer 2 no longer prints suggestions — so on a slim image (such as `php:8.3-fpm-alpine`) you get no warning at install time and it blows up at runtime,
 > with every request that touches Hashids returning a 500. This package's `composer.json` now lists both keys under `suggest`, but you still need to confirm the extension is enabled.
 
-## Configuration structure (Laravel / Webman / ThinkPHP)
+## Configuration structure (Laravel / Webman / ThinkPHP / Yii 2 / Yii 3)
 
 Identical to the repository's `config/hashids.php`:
 
@@ -149,6 +155,10 @@ Identical to the repository's `config/hashids.php`:
 - `connections`: connection name => `salt`, `length`, optional `alphabet`.
 
 > **Hyperf**'s config file lives at a different path (`config/autoload/hashids.php`), but the structure is the same; see the Hyperf section below.
+>
+> **Yii 2** has no separate config file: put the same array into the application's `config/params.php` under `params['hashids']`; see the Yii 2 section below.
+>
+> **Yii 3** reads no config file either — pass the same array to the `ServiceProvider` constructor; see the Yii 3 section below.
 
 ## Framework-free usage
 
@@ -413,7 +423,140 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-All four frameworks share the same configuration structure (root-level `default` + `connections`); only the file path differs: Hyperf uses **`config/autoload/hashids.php`**, while Laravel / Webman / ThinkPHP use **`config/hashids.php`**.
+All six frameworks share the same config **structure** (root-level `default` + `connections`) and differ only in where it lives: Hyperf uses **`config/autoload/hashids.php`**, Laravel / Webman / ThinkPHP use **`config/hashids.php`**, Yii 2 puts it in the **`params['hashids']` entry of `config/params.php`**, and Yii 3 passes it straight to the `ServiceProvider`.
+
+---
+
+## Yii 2
+
+The adapter implements **`yii\base\BootstrapInterface`**, registering the six identifiers with `Yii::$container`; it also ships a **`yii\base\Component`** subclass, which makes Yii's idiomatic `Yii::$app->hashids` available.
+
+### Two entry points, pick the one you need (they are not interchangeable)
+
+**Entry A: the container — the `bootstrap` array in `config/web.php`**
+
+```php
+'bootstrap' => [
+    'log',
+    \Erikwang2013\Hashids\Yii2\Bootstrap::class,
+],
+```
+
+```php
+use Erikwang2013\Hashids\HashidsManager;
+
+$manager = Yii::$container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);
+$alt     = Yii::$container->get('hashids')->connection('alternative')->encode(100);
+```
+
+**Entry B: the application component — the `components` array in `config/web.php`**
+
+```php
+'components' => [
+    'hashids' => [
+        'class'  => \Erikwang2013\Hashids\Yii2\Component::class,
+        'config' => [
+            'default'     => 'main',
+            'connections' => [
+                'main' => ['salt' => getenv('HASHIDS_SALT'), 'length' => 6],
+            ],
+        ],
+    ],
+],
+```
+
+```php
+Yii::$app->hashids->encode(1);                              // __call forwards to the default connection
+Yii::$app->hashids->connection('alternative')->encode(100); // switch connections
+Yii::$app->hashids->manager;                                // reach the underlying HashidsManager
+```
+
+> **Why both entry points are needed**: `yii\di\ServiceLocator::get()` does **not** fall back to `Yii::$container`;
+> it only recognises components registered in its own `_definitions`. So registering `bootstrap` alone does not make `Yii::$app->hashids` work,
+> and conversely, configuring only `components` does not give `Yii::$container->get()` an instance. Configure whichever one you intend to use.
+
+### The config file
+
+Yii 2 has no `config/hashids.php` convention; the config goes in the application's **`config/params.php`** under `params['hashids']`:
+
+```php
+return [
+    // ...
+    'hashids' => [
+        'default'     => 'main',
+        'connections' => [
+            'main' => [
+                // Yii 2 has no global env() helper like Laravel's; use getenv()
+                // or whatever env mechanism your application provides.
+                'salt'   => getenv('HASHIDS_SALT') ?: '',
+                'length' => (int) (getenv('HASHIDS_LENGTH') ?: 0),
+            ],
+        ],
+    ],
+];
+```
+
+What `Bootstrap` reads is `Yii::$app->params['hashids']`; when that key is missing it is treated as an empty array (the default
+connection name falls back to `main`) without erroring — but with no salt the hashes are enumerable, so confirm the salt is set before going live.
+
+> **The default connection is resolved lazily**: the `bootstrap` stage only registers definitions, and the connection is only built
+> when `Hashids\Hashids` is actually resolved. A bad config does not break application startup — it throws `InvalidArgumentException` at resolve time.
+
+The Yii 2 integration extends `yii\base\BootstrapInterface` / `yii\base\Component` and must be used in a **`yiisoft/yii2`**
+environment (listed as suggest by this package).
+
+---
+
+## Yii 3
+
+Yii 3 is a set of packages wired together by a PSR-11 container (`yiisoft/di`); there is no Yii 2-style application config array.
+The adapter is a class implementing **`Yiisoft\Di\ServiceProviderInterface`** whose `getDefinitions()` returns six container identifiers.
+
+**Registration**
+
+```php
+use Erikwang2013\Hashids\Yii3\ServiceProvider;
+use Yiisoft\Di\Container;
+use Yiisoft\Di\ContainerConfig;
+
+$config = ContainerConfig::create()
+    ->withProviders([
+        // The config is passed straight to the provider — Yii 3 prescribes no
+        // config file location, so where the values come from is up to the application.
+        new ServiceProvider($params['hashids'] ?? []),
+    ]);
+
+$container = new Container($config);
+```
+
+**Usage**
+
+```php
+use Erikwang2013\Hashids\HashidsFactory;
+use Erikwang2013\Hashids\HashidsManager;
+use Hashids\Hashids;
+
+$manager = $container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);                                  // default connection
+
+$container->get('hashids')->connection('alternative')->encode(100);   // string alias + connection switch
+$container->get(Hashids::class)->encode(1);                           // default connection, by class name
+$container->get(HashidsFactory::class);                               // the factory
+```
+
+The container has singleton semantics of its own (the same id returns the same instance on every `get()`), so the alias and the
+FQCN resolve to the same set of connections; the adapter's definitions only need to forward, with no need to build objects up front.
+
+> **The exception class gets wrapped one level deeper**: the default connection is resolved lazily, so the assembly stage never fails;
+> but at resolve time the container wraps this package's `InvalidArgumentException` in a **`Yiisoft\Di\BuildingException`** —
+> catching `InvalidArgumentException` will not catch it; inspect `$e->getPrevious()` instead.
+
+> **Provider definitions take precedence over plain definitions**: the real container assembles `definitions` first and `providers` after,
+> so overriding hashids' bindings by editing the same-named key in `definitions` **has no effect** — use `extensions`, or change the provider.
+
+The Yii 3 integration implements `Yiisoft\Di\ServiceProviderInterface` and must be used in a **`yiisoft/di`** environment
+(listed as suggest by this package).
 
 ---
 

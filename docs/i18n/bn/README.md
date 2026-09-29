@@ -8,7 +8,7 @@
 
 <p align="center"><strong>হাশিদি Hashy</strong> — প্রকল্পের মাসকট, বুকে <code>#</code>-ই তার পরিচয়</p>
 
-ডেটাবেসের অটো-ইনক্রিমেন্ট ID-কে বদলে দিন ছোট, আন্দাজ করা কঠিন স্ট্রিংয়ে — **একই API একসাথে চলে Laravel, Webman, ThinkPHP ও Hyperf-এ**।
+ডেটাবেসের অটো-ইনক্রিমেন্ট ID-কে বদলে দিন ছোট, আন্দাজ করা কঠিন স্ট্রিংয়ে — **একই API একসাথে চলে Laravel, Webman, ThinkPHP, Hyperf, Yii 2 ও Yii 3-এ**।
 
 নিচের স্তরে নির্ভরতা [`hashids/hashids`](https://github.com/vinkla/hashids) v5; কনফিগ ও ব্যবহার [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids)-এর সাথে মিলিয়ে রাখা হয়েছে (মাল্টি-কানেকশন, ডিফল্ট কানেকশন, `HashidsManager` + ফ্যাক্টরি), তাই ঝামেলাহীনভাবে বদলে ফেলা যায়।
 
@@ -20,11 +20,11 @@
 
 **মূল বৈশিষ্ট্য:**
 
-- **মাল্টি-ফ্রেমওয়ার্ক সাপোর্ট**: একই API একসাথে Laravel, Webman, ThinkPHP ও Hyperf-এ কাজ করে, মাইগ্রেশনের খরচ খুব কম।
+- **মাল্টি-ফ্রেমওয়ার্ক সাপোর্ট**: একই API একসাথে Laravel, Webman, ThinkPHP, Hyperf, Yii 2 ও Yii 3-এ কাজ করে, মাইগ্রেশনের খরচ খুব কম।
 - **মাল্টি-কানেকশন**: একটি অ্যাপে একাধিক Salt/Length কম্বিনেশন থাকতে পারে (যেমন ইউজার ID ও অর্ডার ID-এর জন্য আলাদা সল্ট), `connection('xxx')` দিয়ে সুইচ করা হয়।
 - **ফ্রেমওয়ার্ক-নিরপেক্ষ**: কোনো নির্দিষ্ট ফ্রেমওয়ার্ক ছাড়াই স্বাধীনভাবে ব্যবহার করা যায়, সরাসরি `new HashidsManager($config, $factory)` লিখলেই চলে।
 - **vinkla/hashids-এর সাথে সামঞ্জস্যপূর্ণ**: Laravel-এ Facade, কন্টেইনার বাইন্ডিং ও `config/hashids.php`-এর ফরম্যাট vinkla/hashids-এর মতোই, তাই ঝামেলাহীনভাবে বদলানো যায়।
-- **ফ্রেমওয়ার্ক-নেটিভ স্টাইল**: প্রতিটি ইন্টিগ্রেশন নিজের ফ্রেমওয়ার্কের রীতি মেনে চলে — Laravel-এ ServiceProvider + Facade, Webman-এ Plugin + Bootstrap, ThinkPHP-তে Service, Hyperf-এ ConfigProvider।
+- **ফ্রেমওয়ার্ক-নেটিভ স্টাইল**: প্রতিটি ইন্টিগ্রেশন নিজের ফ্রেমওয়ার্কের রীতি মেনে চলে — Laravel-এ ServiceProvider + Facade, Webman-এ Plugin + Bootstrap, ThinkPHP-তে Service, Hyperf-এ ConfigProvider, Yii 2-এ Bootstrap + অ্যাপ কম্পোনেন্ট, Yii 3-এ ServiceProvider।
 
 **কোথায় ব্যবহার করবেন:**
 
@@ -64,6 +64,11 @@ hashids/
 │   │   ├── ConfigProvider.php                 # ডিপেন্ডেন্সি ম্যাপিং + কনফিগ পাবলিশ
 │   │   ├── HashidsManagerFactory.php
 │   │   └── HashidsClientFactory.php
+│   ├── Yii2/
+│   │   ├── Bootstrap.php                      # BootstrapInterface: Yii::$container রেজিস্টার করে
+│   │   └── Component.php                      # অ্যাপ কম্পোনেন্ট: Yii::$app->hashids
+│   ├── Yii3/
+│   │   └── ServiceProvider.php                # ServiceProviderInterface: ছয়টি ডেফিনিশন ফেরত দেয়
 │   └── config/plugin/erikwang2013/hashids/    # Webman প্লাগিন স্কেলিটন (ইনস্টলে প্রজেক্টে কপি হয়)
 │       ├── app.php                            # enable সুইচ
 │       └── bootstrap.php                      # Webman\Bootstrap রেজিস্টার
@@ -75,8 +80,9 @@ hashids/
 │   ├── HashidsFactoryTest.php
 │   ├── InstallTest.php
 │   ├── MascotTest.php                         # মাসকট: গ্লিফ অ্যালাইনমেন্ট ও গ্রিটিং
-│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/   # প্রতিটি ফ্রেমওয়ার্ক অ্যাডাপ্টার টেস্ট
+│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/ · Yii2/ · Yii3/   # প্রতিটি ফ্রেমওয়ার্ক অ্যাডাপ্টার টেস্ট
 │   ├── Config/PluginConfigTest.php
+│   ├── Contract/                              # আসল ফ্রেমওয়ার্ক কনট্রাক্ট টেস্ট (CI-তে আলাদা জব, নিচে দেখুন)
 │   └── Support/FrameworkStubs.php             # টেস্টের জন্য ফ্রেমওয়ার্ক ক্লাস স্টাব
 ├── docs/
 │   ├── mascot.svg                             # মাসকট “হাশিদি Hashy”
@@ -103,7 +109,7 @@ hashids/
 | কোর লেয়ার | মাল্টি-কানেকশন ম্যানেজমেন্ট ও ইনস্ট্যান্স তৈরি, **কোনো ফ্রেমওয়ার্কে নির্ভরশীল নয়** | `src/HashidsManager.php`, `src/HashidsFactory.php` |
 | নিচের স্তরের নির্ভরতা | আসল এনকোড/ডিকোড ইমপ্লিমেন্টেশন | `hashids/hashids` |
 
-কোর লেয়ার-ই পুরো প্যাকেজের কেন্দ্র: `HashidsManager` কনফিগ ধরে রাখে, `connection($name)` দরকারমতো কানেকশন তৈরি করে ক্যাশে রাখে, আর `__call()` কানেকশন না-দেওয়া মেথড কল ডিফল্ট কানেকশনে পাঠায়; `HashidsFactory::make()` হলো `Hashids\Hashids` তৈরির একমাত্র জায়গা। চারটি ফ্রেমওয়ার্কের অ্যাডাপ্টার ক্লাস মিলিয়ে প্রায় 250 লাইন (Facade ও দুটি Hyperf ফ্যাক্টরিসহ) — এগুলো শুধু কোরকে নিজ নিজ কন্টেইনারে যুক্ত করে।
+কোর লেয়ার-ই পুরো প্যাকেজের কেন্দ্র: `HashidsManager` কনফিগ ধরে রাখে, `connection($name)` দরকারমতো কানেকশন তৈরি করে ক্যাশে রাখে, আর `__call()` কানেকশন না-দেওয়া মেথড কল ডিফল্ট কানেকশনে পাঠায়; `HashidsFactory::make()` হলো `Hashids\Hashids` তৈরির একমাত্র জায়গা। ছয়টি ফ্রেমওয়ার্কের অ্যাডাপ্টার ক্লাস মিলিয়ে প্রায় 490 লাইন (Facade, দুটি Hyperf ফ্যাক্টরি ও Yii 2-এর অ্যাপ কম্পোনেন্টসহ) — এগুলো শুধু কোরকে নিজ নিজ কন্টেইনারে যুক্ত করে।
 
 ## ফিচার ডিজাইন
 
@@ -113,9 +119,9 @@ hashids/
 
 - **এনকোড/ডিকোড API**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()` — `__call()` হয়ে ডিফল্ট কানেকশনে যায়, আলাদা করে `connection()` লাগে না।
 - **মাল্টি-কানেকশন ম্যানেজমেন্ট**: `connection('alternative')` দিয়ে সুইচ; লেজি লোডিং, একই কানেকশন একবারই তৈরি হয়।
-- **মাল্টি-ফ্রেমওয়ার্ক অ্যাডাপ্টার**: Laravel-এ `ServiceProvider`, Webman-এ `Install` + `Bootstrap`, ThinkPHP-তে `Service`, Hyperf-এ `ConfigProvider` — প্রতিটি নিজের ফ্রেমওয়ার্কের রীতি মেনে।
-- **কন্টেইনার বাইন্ডিং**: ক্লাস-নাম (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) ও স্ট্রিং-কী (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) — দুই ট্র্যাকে বাইন্ডিং, চার ফ্রেমওয়ার্কেই এক; শেষ দুটি স্ট্রিং-কী vinkla/hashids-এর সাথে একই নাম, তাই মাইগ্রেশন সহজ।
-- **কনফিগ ও পাবলিশ**: চারটি ফ্রেমওয়ার্কের স্ট্রাকচার একই — **ফ্ল্যাট অ্যারে** (রুটে `default` + `connections`), শুধু ফাইলের পাথ আলাদা।
+- **মাল্টি-ফ্রেমওয়ার্ক অ্যাডাপ্টার**: Laravel-এ `ServiceProvider`, Webman-এ `Install` + `Bootstrap`, ThinkPHP-তে `Service`, Hyperf-এ `ConfigProvider`, Yii 2-এ `BootstrapInterface` + অ্যাপ কম্পোনেন্ট, Yii 3-এ `ServiceProviderInterface` — প্রতিটি নিজের ফ্রেমওয়ার্কের রীতি মেনে।
+- **কন্টেইনার বাইন্ডিং**: ক্লাস-নাম (`HashidsManager`, `HashidsFactory`, `Hashids\Hashids`) ও স্ট্রিং-কী (`'hashids'`, `'hashids.factory'`, `'hashids.connection'`) — দুই ট্র্যাকে বাইন্ডিং, ছয় ফ্রেমওয়ার্কেই এক; শেষ দুটি স্ট্রিং-কী vinkla/hashids-এর সাথে একই নাম, তাই মাইগ্রেশন সহজ।
+- **কনফিগ ও পাবলিশ**: ছয়টি ফ্রেমওয়ার্কের কনফিগের **আকৃতি একই** — **ফ্ল্যাট অ্যারে** (রুটে `default` + `connections`), পার্থক্য শুধু কোথায় রাখা হয় তাতে — Laravel / Webman / ThinkPHP-তে `config/hashids.php`, Hyperf-এ `config/autoload/hashids.php`, Yii 2-এ `config/params.php`-এর `params['hashids']`, Yii 3-এ সরাসরি `ServiceProvider`-এর কনস্ট্রাক্টরে (ফ্রেমওয়ার্ক কোনো কনফিগ ফাইলের জায়গা ঠিক করে না)।
 - **ফ্রেমওয়ার্ক-মুক্ত কোর**: `new HashidsManager($config, $factory)` লিখলেই চলে, `$config` না-অ্যারে হলেও সমস্যা নেই (খালি অ্যারে হিসেবে নরমালাইজ হয়)।
 
 ## লাইফসাইকল
@@ -124,7 +130,7 @@ hashids/
 
 | পর্যায় | কী ঘটে |
 |------|-----------|
-| **ইনস্টল পর্যায়** | `composer require` প্যাকেজ নামায় → Laravel অটো-ডিসকভারি / Webman ইনস্টল হুক প্লাগিন স্কেলিটন কপি করে → `salt` / `length` / `alphabet` লোড হয় |
+| **ইনস্টল পর্যায়** | `composer require` প্যাকেজ নামায় → Laravel অটো-ডিসকভারি / Webman ইনস্টল হুক প্লাগিন স্কেলিটন কপি করে / Yii 2 অ্যাপ কনফিগে `Bootstrap` বা কম্পোনেন্ট রেজিস্টার করে / Yii 3 `ContainerConfig::withProviders()`-এ `ServiceProvider` রেজিস্টার করে → `salt` / `length` / `alphabet` লোড হয় |
 | **রানটাইম পর্যায়** | কন্টেইনার `HashidsManager` রেজলভ করে → `encode()` / `decode()` → `__call()` `connection($name)`-এ ফরওয়ার্ড করে → **ক্যাশে থাকলে সরাসরি ব্যবহার, না থাকলে `HashidsFactory::make()` দিয়ে তৈরি করে `$connections`-এ লেখে** → শর্ট ID বা আসল সংখ্যা ফেরত দেয় |
 | **আনইনস্টল পর্যায়** | `composer remove` → `Install::uninstall()` চলে, `config/plugin/erikwang2013/hashids` মুছে যায়; **`config/hashids.php` থেকে যায়**, মুছবেন কি না তা ব্যবহারকারীর সিদ্ধান্ত |
 
@@ -141,7 +147,7 @@ composer require erikwang2013/hashids
 > আর Composer 2 আর suggest প্রিন্ট করে না — ফলে স্লিম ইমেজে (যেমন `php:8.3-fpm-alpine`) ইনস্টলের সময় কোনো ইঙ্গিতই মেলে না, ধরা পড়ে শুধু রানটাইমে,
 > আর Hashids ব্যবহার করা প্রতিটি রিকোয়েস্ট 500 দেয়। এই প্যাকেজের `composer.json`-এর `suggest`-এ দুটি কী যোগ করা হয়েছে, তবু এক্সটেনশন চালু আছে কি না আপনি নিশ্চিত করুন।
 
-## কনফিগ কাঠামো (Laravel / Webman / ThinkPHP)
+## কনফিগ কাঠামো (Laravel / Webman / ThinkPHP / Yii 2 / Yii 3)
 
 রিপোর `config/hashids.php`-এর সাথে হুবহু এক:
 
@@ -149,6 +155,10 @@ composer require erikwang2013/hashids
 - `connections`: কানেকশনের নাম => `salt`, `length`, ঐচ্ছিক `alphabet`।
 
 > **Hyperf**-এর কনফিগ ফাইলের **পাথ** আলাদা (`config/autoload/hashids.php`), কিন্তু **স্ট্রাকচার একই** — নিচের Hyperf অংশ দেখুন।
+>
+> **Yii 2**-এর জন্য আলাদা কনফিগ ফাইল লাগে না — একই অ্যারেটি অ্যাপের `config/params.php`-এর `params['hashids']`-এ রেখে দিন, নিচের Yii 2 অংশ দেখুন।
+>
+> **Yii 3**-ও কনফিগ ফাইল পড়ে না, একই অ্যারেটি `ServiceProvider`-এর কনস্ট্রাক্টরে পাস করলেই হয়, নিচের Yii 3 অংশ দেখুন।
 
 ## ফ্রেমওয়ার্ক ছাড়া ব্যবহার
 
@@ -413,7 +423,140 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-চারটি ফ্রেমওয়ার্কের কনফিগ স্ট্রাকচার একই (রুটে `default` + `connections`), শুধু ফাইলের পাথ আলাদা: Hyperf ব্যবহার করে **`config/autoload/hashids.php`**, আর Laravel / Webman / ThinkPHP ব্যবহার করে **`config/hashids.php`**।
+ছয়টি ফ্রেমওয়ার্কের কনফিগ **স্ট্রাকচার একই** (রুটে `default` + `connections`), পার্থক্য শুধু কোথায় রাখা হয়: Hyperf ব্যবহার করে **`config/autoload/hashids.php`**, Laravel / Webman / ThinkPHP ব্যবহার করে **`config/hashids.php`**, Yii 2 রাখে **`config/params.php`-এর `params['hashids']`**-এ, আর Yii 3 সরাসরি `ServiceProvider`-কে পাস করে।
+
+---
+
+## Yii 2
+
+অ্যাডাপ্টারটি **`yii\base\BootstrapInterface`** ইমপ্লিমেন্ট করে ছয়টি আইডেন্টিটি `Yii::$container`-এ রেজিস্টার করে; এর সাথে **`yii\base\Component`** সাবক্লাসও দেওয়া আছে, যাতে Yii-র প্রচলিত `Yii::$app->hashids` ব্যবহার করা যায়।
+
+### দুটি এন্ট্রি, প্রয়োজনমতো বেছে নিন (একটির বদলে অন্যটি চলে না)
+
+**এন্ট্রি A: কন্টেইনার —— `config/web.php`-এর `bootstrap` অ্যারে**
+
+```php
+'bootstrap' => [
+    'log',
+    \Erikwang2013\Hashids\Yii2\Bootstrap::class,
+],
+```
+
+```php
+use Erikwang2013\Hashids\HashidsManager;
+
+$manager = Yii::$container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);
+$alt     = Yii::$container->get('hashids')->connection('alternative')->encode(100);
+```
+
+**এন্ট্রি B: অ্যাপ কম্পোনেন্ট —— `config/web.php`-এর `components` অ্যারে**
+
+```php
+'components' => [
+    'hashids' => [
+        'class'  => \Erikwang2013\Hashids\Yii2\Component::class,
+        'config' => [
+            'default'     => 'main',
+            'connections' => [
+                'main' => ['salt' => getenv('HASHIDS_SALT'), 'length' => 6],
+            ],
+        ],
+    ],
+],
+```
+
+```php
+Yii::$app->hashids->encode(1);                              // __call ডিফল্ট কানেকশনে পাঠায়
+Yii::$app->hashids->connection('alternative')->encode(100); // কানেকশন বদল
+Yii::$app->hashids->manager;                                // ভেতরের HashidsManager নিন
+```
+
+> **দুটি এন্ট্রিই কেন দরকার**: `yii\di\ServiceLocator::get()` **কখনোই** `Yii::$container`-এ ফলব্যাক করে না,
+> শুধু নিজের `_definitions`-এ রেজিস্টার করা কম্পোনেন্ট চেনে। তাই শুধু `bootstrap` রেজিস্টার করলে `Yii::$app->hashids`
+> কাজ করবে না; উল্টোটা — শুধু `components` কনফিগ করলে `Yii::$container->get()` ইনস্ট্যান্স পাবে না। যেটা লাগবে সেটাই কনফিগ করুন।
+
+### কনফিগ ফাইল
+
+Yii 2-তে `config/hashids.php`-এর মতো কোনো প্রচলিত নিয়ম নেই, কনফিগ রাখা হয় অ্যাপের **`config/params.php`**-এর `params['hashids']`-এ:
+
+```php
+return [
+    // ...
+    'hashids' => [
+        'default'     => 'main',
+        'connections' => [
+            'main' => [
+                // Yii 2-তে Laravel-এর মতো গ্লোবাল env() হেল্পার নেই, তাই getenv()
+                // বা আপনার নিজের অ্যাপের env মেকানিজম ব্যবহার করুন।
+                'salt'   => getenv('HASHIDS_SALT') ?: '',
+                'length' => (int) (getenv('HASHIDS_LENGTH') ?: 0),
+            ],
+        ],
+    ],
+];
+```
+
+`Bootstrap` পড়ে ঠিক `Yii::$app->params['hashids']`-ই; কীটি না থাকলে খালি অ্যারে ধরে নেয় (ডিফল্ট কানেকশনের
+নাম `main`-এ ফিরে যায়), কোনো এরর দেয় না —— তবে salt না থাকলে হ্যাশ এনুমারেট করা যায়, লাইভে দেওয়ার আগে salt সেট আছে কি না নিশ্চিত করুন।
+
+> **ডিফল্ট কানেকশন লেজিলি রেজলভ হয়**: `bootstrap` পর্যায়ে শুধু ডেফিনিশন রেজিস্টার হয়, সত্যিকারভাবে `Hashids\Hashids`
+> নেওয়ার সময়ই কানেকশন তৈরি হয়। কনফিগ ভুল লিখলে পুরো অ্যাপ চালু হতে ব্যর্থ হয় না, বরং ব্যবহারের সময় `InvalidArgumentException` ছোঁড়ে।
+
+Yii 2 ইন্টিগ্রেশন `yii\base\BootstrapInterface` / `yii\base\Component` থেকে ইনহেরিট করে, **`yiisoft/yii2`**
+পরিবেশে ব্যবহার করতে হয় (এই প্যাকেজে suggest হিসেবে আছে)।
+
+---
+
+## Yii 3
+
+Yii 3 হলো PSR-11 কন্টেইনার (`yiisoft/di`) দিয়ে জোড়া লাগানো প্যাকেজের সমষ্টি, এতে Yii 2-এর মতো অ্যাপ কনফিগ অ্যারে নেই।
+অ্যাডাপ্টারটি **`Yiisoft\Di\ServiceProviderInterface`** ইমপ্লিমেন্ট করা একটি ক্লাস, `getDefinitions()` ছয়টি কন্টেইনার আইডেন্টিটি ফেরত দেয়।
+
+**রেজিস্ট্রেশন**
+
+```php
+use Erikwang2013\Hashids\Yii3\ServiceProvider;
+use Yiisoft\Di\Container;
+use Yiisoft\Di\ContainerConfig;
+
+$config = ContainerConfig::create()
+    ->withProviders([
+        // কনফিগ সরাসরি provider-কে দেওয়া হয় —— Yii 3 কনফিগ ফাইলের জায়গা ঠিক করে না,
+        // মান কোথা থেকে আসবে (params, env, কনফিগ সেন্টার) তা অ্যাপ নিজেই ঠিক করে।
+        new ServiceProvider($params['hashids'] ?? []),
+    ]);
+
+$container = new Container($config);
+```
+
+**ব্যবহার**
+
+```php
+use Erikwang2013\Hashids\HashidsFactory;
+use Erikwang2013\Hashids\HashidsManager;
+use Hashids\Hashids;
+
+$manager = $container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);                                  // ডিফল্ট কানেকশন
+
+$container->get('hashids')->connection('alternative')->encode(100);   // স্ট্রিং অ্যালিয়াস + কানেকশন বদল
+$container->get(Hashids::class)->encode(1);                           // ক্লাস-নাম দিয়ে ডিফল্ট কানেকশন
+$container->get(HashidsFactory::class);                               // ফ্যাক্টরি
+```
+
+কন্টেইনারের নিজস্ব সিঙ্গলটন সেমান্টিক্স আছে (একই id-তে প্রতিবার `get()` একই ইনস্ট্যান্স ফেরত দেয়), তাই অ্যালিয়াস ও FQCN
+একই কানেকশনের সেটই পায়; অ্যাডাপ্টারের ডেফিনিশন শুধু ফরওয়ার্ড করলেই যথেষ্ট, আগে থেকে অবজেক্ট বানাতে হয় না।
+
+> **এরর ক্লাস-নামে একটা লেয়ার বাড়ে**: ডিফল্ট কানেকশন লেজিলি রেজলভ হয়, তাই অ্যাসেম্বলি পর্যায়ে ব্যর্থ হয় না;
+> কিন্তু ব্যবহারের সময় কন্টেইনার এই প্যাকেজের `InvalidArgumentException`-কে **`Yiisoft\Di\BuildingException`**-এ
+> মুড়ে ছোঁড়ে —— `catch`-এ `InvalidArgumentException` লিখলে ধরা পড়বে না, `$e->getPrevious()` দেখতে হবে।
+
+> **provider-এর ডেফিনিশন সাধারণ definitions-এর চেয়ে অগ্রাধিকার পায়**: আসল কন্টেইনারের অ্যাসেম্বলি ক্রম হলো আগে `definitions`,
+> পরে `providers`, তাই hashids-এর বাইন্ডিং ওভাররাইড করতে `definitions`-এর একই নামের কী বদলালে **কাজ হবে না**, `extensions` ব্যবহার করতে হবে বা provider-ই বদলাতে হবে।
+
+Yii 3 ইন্টিগ্রেশন `Yiisoft\Di\ServiceProviderInterface` ইমপ্লিমেন্ট করে, **`yiisoft/di`** পরিবেশে ব্যবহার করতে হয়
+(এই প্যাকেজে suggest হিসেবে আছে)।
 
 ---
 

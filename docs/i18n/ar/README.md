@@ -8,7 +8,7 @@
 
 <p align="center"><strong>حاشيدي Hashy</strong> — التميمة الخاصة بالمشروع، وعلامة <code>#</code> على صدره هي شعاره</p>
 
-حوِّل معرّفات قاعدة البيانات التلقائية إلى نصوص قصيرة يتعذّر تخمينها، **بواجهة API واحدة تعمل في الوقت نفسه على Laravel وWebman وThinkPHP وHyperf**.
+حوِّل معرّفات قاعدة البيانات التلقائية إلى نصوص قصيرة يتعذّر تخمينها، **بواجهة API واحدة تعمل في الوقت نفسه على Laravel وWebman وThinkPHP وHyperf وYii 2 وYii 3**.
 
 يعتمد في الأساس على [`hashids/hashids`](https://github.com/vinkla/hashids) v5؛ وتتوافق تهيئته وطريقة استخدامه مع [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids) (اتصالات متعددة، الاتصال الافتراضي، `HashidsManager` + المصنع)، ما يتيح استبداله بسلاسة.
 
@@ -20,11 +20,11 @@
 
 **المزايا الأساسية:**
 
-- **توافق مع عدة أطر**: واجهة API واحدة تدعم Laravel وWebman وThinkPHP وHyperf معًا، بتكلفة انتقال ضئيلة جدًا.
+- **توافق مع عدة أطر**: واجهة API واحدة تدعم Laravel وWebman وThinkPHP وHyperf وYii 2 وYii 3 معًا، بتكلفة انتقال ضئيلة جدًا.
 - **دعم اتصالات متعددة**: يمكن للتطبيق الواحد تهيئة عدة تركيبات من Salt/Length (مثل استخدام قيمة ملح مختلفة لمعرّفات المستخدمين ومعرّفات الطلبات)، والتبديل بينها عبر `connection('xxx')`.
 - **بلا اعتماد على أي إطار**: يعمل باستقلال دون أي إطار محدد، ويكفي `new HashidsManager($config, $factory)` لتشغيله.
 - **توافق مع vinkla/hashids**: في Laravel تكون الـ Facade وربط الحاوية وصيغة `config/hashids.php` مطابقة لـ vinkla/hashids، فيتم الاستبدال بسلاسة.
-- **أسلوب أصيل لكل إطار**: يتبع كل تكامل عُرف إطاره — Laravel بـ ServiceProvider + Facade، وWebman بـ Plugin + Bootstrap، وThinkPHP بـ Service، وHyperf بـ ConfigProvider.
+- **أسلوب أصيل لكل إطار**: يتبع كل تكامل عُرف إطاره — Laravel بـ ServiceProvider + Facade، وWebman بـ Plugin + Bootstrap، وThinkPHP بـ Service، وHyperf بـ ConfigProvider، وYii 2 بـ Bootstrap + مكوّن التطبيق، وYii 3 بـ ServiceProvider.
 
 **حالات الاستخدام:**
 
@@ -64,6 +64,11 @@ hashids/
 │   │   ├── ConfigProvider.php                 # خريطة التبعيات + نشر الإعدادات
 │   │   ├── HashidsManagerFactory.php
 │   │   └── HashidsClientFactory.php
+│   ├── Yii2/
+│   │   ├── Bootstrap.php                      # BootstrapInterface: تسجيل Yii::$container
+│   │   └── Component.php                      # مكوّن التطبيق: Yii::$app->hashids
+│   ├── Yii3/
+│   │   └── ServiceProvider.php                # ServiceProviderInterface: إرجاع ستة تعريفات
 │   └── config/plugin/erikwang2013/hashids/    # هيكل إضافة Webman (يُنسخ إلى المشروع عند التثبيت)
 │       ├── app.php                            # مفتاح enable
 │       └── bootstrap.php                      # تسجيل Webman\Bootstrap
@@ -75,8 +80,9 @@ hashids/
 │   ├── HashidsFactoryTest.php
 │   ├── InstallTest.php
 │   ├── MascotTest.php                         # التميمة: محاذاة الرسم والتحية
-│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/   # اختبارات تكامل كل إطار
+│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/ · Yii2/ · Yii3/   # اختبارات تكامل كل إطار
 │   ├── Config/PluginConfigTest.php
+│   ├── Contract/                              # اختبارات عقد الأطر الحقيقية (مهمة CI منفصلة، انظر أدناه)
 │   └── Support/FrameworkStubs.php             # بدائل أصناف الأطر المستخدمة في الاختبارات
 ├── docs/
 │   ├── mascot.svg                             # التميمة «حاشيدي Hashy»
@@ -103,7 +109,7 @@ hashids/
 | الطبقة الأساسية | إدارة الاتصالات المتعددة وبناء النسخ، **دون الاعتماد على أي إطار** | `src/HashidsManager.php`، `src/HashidsFactory.php` |
 | التبعية الأساسية | تنفيذ الترميز وفكّه فعليًا | `hashids/hashids` |
 
-الطبقة الأساسية هي ثقل الحزمة: `HashidsManager` يحمل الإعدادات، و`connection($name)` يبني الاتصال ويخزّنه عند الطلب، و`__call()` يعيد توجيه نداءات الطرق التي لا تحدّد اتصالًا إلى الاتصال الافتراضي؛ و`HashidsFactory::make()` هو الموضع الوحيد الذي يُنشئ `Hashids\Hashids`. أما أصناف تكييف الأطر الأربعة فمجموع أسطرها نحو 250 سطرًا (مع الـ Facade ومصنعَي Hyperf) — وهي مسؤولة فقط عن وصل النواة بحاويات كل إطار.
+الطبقة الأساسية هي ثقل الحزمة: `HashidsManager` يحمل الإعدادات، و`connection($name)` يبني الاتصال ويخزّنه عند الطلب، و`__call()` يعيد توجيه نداءات الطرق التي لا تحدّد اتصالًا إلى الاتصال الافتراضي؛ و`HashidsFactory::make()` هو الموضع الوحيد الذي يُنشئ `Hashids\Hashids`. أما أصناف تكييف الأطر الستة فمجموع أسطرها نحو 490 سطرًا (مع الـ Facade ومصنعَي Hyperf ومكوّن التطبيق في Yii 2) — وهي مسؤولة فقط عن وصل النواة بحاويات كل إطار.
 
 ## تصميم المزايا
 
@@ -113,9 +119,9 @@ hashids/
 
 - **واجهة الترميز وفكّه**: `encode()` / `decode()` / `encodeHex()` / `decodeHex()` تمرّ عبر `__call()` إلى الاتصال الافتراضي دون حاجة إلى `connection()` صريحة.
 - **إدارة الاتصالات المتعددة**: التبديل عبر `connection('alternative')`؛ بناء عند الطلب، ولا يُبنى الاتصال نفسه إلا مرة واحدة.
-- **تكييف عدة أطر**: Laravel بـ `ServiceProvider`، وWebman بـ `Install` + `Bootstrap`، وThinkPHP بـ `Service`، وHyperf بـ `ConfigProvider`، كلٌّ وفق عُرف إطاره.
-- **ربط الحاوية**: ربط على مسارين — أسماء الأصناف (`HashidsManager` و`HashidsFactory` و`Hashids\Hashids`) والمفاتيح النصية (`'hashids'` و`'hashids.factory'` و`'hashids.connection'`) — متطابق في الأطر الأربعة؛ والمفتاحان النصيان الأخيران باسم vinkla/hashids نفسه، ما يسهّل الانتقال.
-- **الإعدادات والنشر**: الأطر الأربعة متطابقة في البنية، وكلها **مصفوفة مسطّحة** (`default` + `connections` في الجذر)، والفرق في مسار الملف فقط.
+- **تكييف عدة أطر**: Laravel بـ `ServiceProvider`، وWebman بـ `Install` + `Bootstrap`، وThinkPHP بـ `Service`، وHyperf بـ `ConfigProvider`، وYii 2 بـ `BootstrapInterface` + مكوّن التطبيق، وYii 3 بـ `ServiceProviderInterface`، كلٌّ وفق عُرف إطاره.
+- **ربط الحاوية**: ربط على مسارين — أسماء الأصناف (`HashidsManager` و`HashidsFactory` و`Hashids\Hashids`) والمفاتيح النصية (`'hashids'` و`'hashids.factory'` و`'hashids.connection'`) — متطابق في الأطر الستة؛ والمفتاحان النصيان الأخيران باسم vinkla/hashids نفسه، ما يسهّل الانتقال.
+- **الإعدادات والنشر**: إعدادات الأطر الستة **متطابقة في الشكل**، وكلها **مصفوفة مسطّحة** (`default` + `connections` في الجذر)، والفرق في موضعها فقط — Laravel / Webman / ThinkPHP في `config/hashids.php`، وHyperf في `config/autoload/hashids.php`، وYii 2 في `params['hashids']` داخل `config/params.php`، وYii 3 تُمرَّر مباشرة إلى بانية `ServiceProvider` (فالإطار لا يفرض موضع ملف إعدادات).
 - **نواة بلا اعتماد على أي إطار**: تعمل بـ `new HashidsManager($config, $factory)`، والوسيط `$config` يتقبّل غير المصفوفات (يُطبَّع إلى مصفوفة فارغة).
 
 ## دورة الحياة
@@ -124,7 +130,7 @@ hashids/
 
 | المرحلة | ما الذي يحدث |
 |------|-----------|
-| **مرحلة التثبيت** | `composer require` يجلب الحزمة → الاكتشاف التلقائي في Laravel / خطاف التثبيت في Webman ينسخ هيكل الإضافة → تحميل `salt` / `length` / `alphabet` |
+| **مرحلة التثبيت** | `composer require` يجلب الحزمة → الاكتشاف التلقائي في Laravel / خطاف التثبيت في Webman ينسخ هيكل الإضافة / تسجيل `Bootstrap` أو المكوّن في إعدادات التطبيق في Yii 2 / تسجيل `ServiceProvider` في `ContainerConfig::withProviders()` في Yii 3 → تحميل `salt` / `length` / `alphabet` |
 | **مرحلة التشغيل** | الحاوية تحلّل `HashidsManager` → `encode()` / `decode()` → `__call()` يعيد التوجيه إلى `connection($name)` → **عند إصابة الذاكرة المؤقتة تُعاد النسخة مباشرة، وعند عدم الإصابة فقط يُبنى الاتصال بـ `HashidsFactory::make()` ويُكتب في `$connections`** → إرجاع المعرّف القصير أو الرقم الأصلي |
 | **مرحلة الإزالة** | `composer remove` يستدعي `Install::uninstall()` فتُحذف `config/plugin/erikwang2013/hashids`؛ **ويبقى `config/hashids.php`**، والقرار في تنظيفه متروك للمستخدم |
 
@@ -141,7 +147,7 @@ composer require erikwang2013/hashids
 > وComposer 2 لم يعد يطبع اقتراحات suggest — لذا على الصور المصغّرة (مثل `php:8.3-fpm-alpine`) لا يظهر أي تنبيه وقت التثبيت، ولا ينفجر الأمر إلا وقت التشغيل،
 > فيردّ كل طلب يستخدم Hashids بالخطأ 500. وقد أُضيف هذان المفتاحان إلى `suggest` في `composer.json` الخاص بهذه الحزمة، لكن لا يزال عليك التأكّد من أن الامتداد مُفعَّل.
 
-## بنية الإعدادات (Laravel / Webman / ThinkPHP)
+## بنية الإعدادات (Laravel / Webman / ThinkPHP / Yii 2 / Yii 3)
 
 يُطابق الملف `config/hashids.php` في المستودع:
 
@@ -149,6 +155,10 @@ composer require erikwang2013/hashids
 - `connections`: اسم الاتصال => `salt` و`length` و`alphabet` اختياريًا.
 
 > مسار ملف الإعدادات في **Hyperf** مختلف (`config/autoload/hashids.php`)، لكن البنية واحدة، انظر قسم Hyperf أدناه.
+>
+> **Yii 2** لا يستخدم ملف إعدادات منفصلًا، بل يضع المصفوفة نفسها في `params['hashids']` داخل `config/params.php` في التطبيق، انظر قسم Yii 2 أدناه.
+>
+> **Yii 3** لا يقرأ ملف إعدادات هو الآخر، ويكفي تمرير المصفوفة نفسها إلى بانية `ServiceProvider`، انظر قسم Yii 3 أدناه.
 
 ## الاستخدام بدون إطار
 
@@ -413,7 +423,140 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-بنية الإعدادات متطابقة في الأطر الأربعة (`default` + `connections` في الجذر)، والفرق في مسار الملف فقط: Hyperf يستخدم **`config/autoload/hashids.php`**، بينما Laravel / Webman / ThinkPHP فتستخدم **`config/hashids.php`**.
+بنية الإعدادات متطابقة في الأطر الستة (`default` + `connections` في الجذر)، والفرق في موضعها فقط: Hyperf يستخدم **`config/autoload/hashids.php`**، بينما Laravel / Webman / ThinkPHP فتستخدم **`config/hashids.php`**، وYii 2 يضعها في **`params['hashids']` داخل `config/params.php`**، وYii 3 يمرّرها مباشرة إلى `ServiceProvider`.
+
+---
+
+## Yii 2
+
+صنف التكييف يُنفِّذ الواجهة **`yii\base\BootstrapInterface`** ويسجّل المعرّفات الستة في `Yii::$container`؛ كما يوفّر صنفًا ابنًا لـ **`yii\base\Component`** يتيح الصيغة المألوفة في Yii: `Yii::$app->hashids`.
+
+### مدخلان، اختر ما يناسبك (لا يُغني أحدهما عن الآخر)
+
+**المدخل A: الحاوية — مصفوفة `bootstrap` في `config/web.php`**
+
+```php
+'bootstrap' => [
+    'log',
+    \Erikwang2013\Hashids\Yii2\Bootstrap::class,
+],
+```
+
+```php
+use Erikwang2013\Hashids\HashidsManager;
+
+$manager = Yii::$container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);
+$alt     = Yii::$container->get('hashids')->connection('alternative')->encode(100);
+```
+
+**المدخل B: مكوّن التطبيق — مصفوفة `components` في `config/web.php`**
+
+```php
+'components' => [
+    'hashids' => [
+        'class'  => \Erikwang2013\Hashids\Yii2\Component::class,
+        'config' => [
+            'default'     => 'main',
+            'connections' => [
+                'main' => ['salt' => getenv('HASHIDS_SALT'), 'length' => 6],
+            ],
+        ],
+    ],
+],
+```
+
+```php
+Yii::$app->hashids->encode(1);                              // __call يوجّه إلى الاتصال الافتراضي
+Yii::$app->hashids->connection('alternative')->encode(100); // تبديل الاتصال
+Yii::$app->hashids->manager;                                // الحصول على HashidsManager الأساسي
+```
+
+> **لماذا المدخلان معًا**: `yii\di\ServiceLocator::get()` **لا** يرجع إلى `Yii::$container`،
+> بل لا يعترف إلا بالمكوّنات المسجّلة في `_definitions` الخاصة به؛ فمجرّد تسجيل `bootstrap`
+> لا يجعل `Yii::$app->hashids` يعمل، وبالمقابل لا يجعل إعداد `components` وحده `Yii::$container->get()` يحصل على نسخة. فما تحتاجه هو ما تُعدّه.
+
+### ملف الإعدادات
+
+لا يعرف Yii 2 اتفاقًا مثل `config/hashids.php`، بل يوضع الإعداد في `params['hashids']` داخل **`config/params.php`** في التطبيق:
+
+```php
+return [
+    // ...
+    'hashids' => [
+        'default'     => 'main',
+        'connections' => [
+            'main' => [
+                // لا يوفّر Yii 2 دالة env() عامة كما في Laravel، بل استخدم getenv()
+                // أو آلية env الخاصة بتطبيقك.
+                'salt'   => getenv('HASHIDS_SALT') ?: '',
+                'length' => (int) (getenv('HASHIDS_LENGTH') ?: 0),
+            ],
+        ],
+    ],
+];
+```
+
+`Bootstrap` يقرأ بالضبط `Yii::$app->params['hashids']`؛ وعند غياب هذا المفتاح يُتعامل معه كمصفوفة فارغة
+(ويُرجع اسم الاتصال الافتراضي `main`) دون خطأ — لكن مع غياب salt تصبح القيم المرمّزة قابلة للتعداد، فتأكّد من ضبط الملح قبل الإطلاق.
+
+> **الاتصال الافتراضي يُحلَّل عند الطلب**: في مرحلة `bootstrap` لا يُسجَّل سوى التعريف، ولا يُبنى الاتصال إلا عند جلب `Hashids\Hashids` فعلًا.
+> وخطأ الإعداد لا يُفشل إقلاع التطبيق كله، بل يُرمى `InvalidArgumentException` عند الاستخدام.
+
+يتطلّب تكامل Yii 2 وراثة `yii\base\BootstrapInterface` / `yii\base\Component`، ويحتاج بيئة **`yiisoft/yii2`**
+(مدرج ضمن suggest في هذه الحزمة).
+
+---
+
+## Yii 3
+
+Yii 3 مجموعة حزم تُجمَّع عبر حاوية PSR-11 (وهي `yiisoft/di`)، وليس فيه مصفوفة إعدادات تطبيق كما في Yii 2.
+وصنف التكييف هنا صنف يُنفِّذ **`Yiisoft\Di\ServiceProviderInterface`**، وتُرجِع فيه `getDefinitions()` ستة معرّفات للحاوية.
+
+**التسجيل**
+
+```php
+use Erikwang2013\Hashids\Yii3\ServiceProvider;
+use Yiisoft\Di\Container;
+use Yiisoft\Di\ContainerConfig;
+
+$config = ContainerConfig::create()
+    ->withProviders([
+        // يُمرَّر الإعداد مباشرة إلى provider — فـ Yii 3 لا يفرض موضعًا لملف الإعدادات،
+        // ومن أين تأتي القيم (params أو env أو مركز الإعدادات) قرار التطبيق وحده.
+        new ServiceProvider($params['hashids'] ?? []),
+    ]);
+
+$container = new Container($config);
+```
+
+**الاستخدام**
+
+```php
+use Erikwang2013\Hashids\HashidsFactory;
+use Erikwang2013\Hashids\HashidsManager;
+use Hashids\Hashids;
+
+$manager = $container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);                                  // الاتصال الافتراضي
+
+$container->get('hashids')->connection('alternative')->encode(100);   // اسم نصي مستعار + تبديل الاتصال
+$container->get(Hashids::class)->encode(1);                           // الاتصال الافتراضي عبر اسم الصنف
+$container->get(HashidsFactory::class);                               // المصنع
+```
+
+للحاوية دلالة النسخة الواحدة (فالمعرّف نفسه يعيد النسخة نفسها في كل `get()`)، لذا يحصل الاسم المستعار والاسم الكامل FQCN على الاتصالات نفسها،
+ولا يحتاج تعريف صنف التكييف إلا إلى إعادة التوجيه، دون إنشاء الكائنات مسبقًا.
+
+> **اسم الخطأ سيُغلَّف بطبقة إضافية**: الاتصال الافتراضي يُحلَّل عند الطلب، فلا يفشل طور التجميع؛ لكن الحاوية عند الاستخدام
+> تُغلّف `InvalidArgumentException` القادم من هذه الحزمة في **`Yiisoft\Di\BuildingException`** وترميه — فكتابة
+> `InvalidArgumentException` داخل `catch` لن تلتقطه، بل عليك النظر في `$e->getPrevious()`.
+
+> **تعريفات provider تتقدّم على تعريفات definitions العادية**: ترتيب تجميع الحاوية الحقيقية هو `definitions` أولًا ثم `providers`،
+> لذا فإن تعديل المفتاح نفسه في `definitions` لتجاوز ربط hashids **لا يفيد**، بل استخدم `extensions` أو عدِّل الـ provider.
+
+يُنفِّذ تكامل Yii 3 الواجهة `Yiisoft\Di\ServiceProviderInterface`، ويحتاج بيئة **`yiisoft/di`**
+(مدرج ضمن suggest في هذه الحزمة).
 
 ---
 

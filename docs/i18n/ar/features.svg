@@ -73,14 +73,14 @@
 
   <rect class="card" x="60" y="330" width="400" height="112" rx="12"/>
   <text class="t-database" x="82" y="363" font-size="13">تكييف عدة أطر</text>
-  <text class="t-muted" x="82" y="390" font-size="10">تكاملات Laravel / Webman / ThinkPHP / Hyperf</text>
-  <text class="t-muted" x="82" y="412" font-size="10">Laravel = ServiceProvider · Webman = Bootstrap</text>
-  <text class="t-dim"   x="82" y="432" font-size="10">ThinkPHP = Service · Hyperf = ConfigProvider</text>
+  <text class="t-muted" x="82" y="390" font-size="10">تكاملات Laravel / Webman / ThinkPHP / Hyperf / Yii 2 / Yii 3</text>
+  <text class="t-muted" x="82" y="412" font-size="9">Laravel = ServiceProvider · Webman = Bootstrap · ThinkPHP = Service</text>
+  <text class="t-dim"   x="82" y="432" font-size="9">Hyperf = ConfigProvider · Yii 2 = Bootstrap · Yii 3 = ServiceProvider</text>
 
   <rect class="card" x="60" y="460" width="400" height="112" rx="12"/>
   <text class="t-security" x="82" y="493" font-size="13">الإعدادات والنشر</text>
-  <text class="t-muted" x="82" y="520" font-size="10">بنية مسطّحة: الأطر الأربعة متطابقة</text>
-  <text class="t-muted" x="82" y="542" font-size="10">المسار: config/hashids.php أو autoload/</text>
+  <text class="t-muted" x="82" y="520" font-size="10">بنية مسطّحة: الأطر الستة متطابقة</text>
+  <text class="t-muted" x="82" y="542" font-size="10">المسار: config/hashids.php · autoload/ · params</text>
   <text class="t-dim"   x="82" y="562" font-size="10">vendor:publish · نسخ عبر Install · publish</text>
 
   <!-- right column -->

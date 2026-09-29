@@ -8,7 +8,7 @@
 
 <p align="center"><strong>哈希迪 Hashy</strong> — 项目宠物，胸口的 <code>#</code> 是它的招牌</p>
 
-把数据库自增 ID 换成短小、不可猜测的字符串，**一套 API 同时跑在 Laravel、Webman、ThinkPHP、Hyperf 上**。
+把数据库自增 ID 换成短小、不可猜测的字符串，**一套 API 同时跑在 Laravel、Webman、ThinkPHP、Hyperf、Yii 2、Yii 3 上**。
 
 底层依赖 [`hashids/hashids`](https://github.com/vinkla/hashids) v5；配置与用法对齐 [**vinkla/hashids**](https://github.com/vinkla/laravel-hashids)（多连接、默认连接、`HashidsManager` + 工厂），可平滑替换。
 
@@ -20,11 +20,11 @@
 
 **核心特性：**
 
-- **多框架兼容**：同一套 API 同时支持 Laravel、Webman、ThinkPHP、Hyperf，迁移成本极低。
+- **多框架兼容**：同一套 API 同时支持 Laravel、Webman、ThinkPHP、Hyperf、Yii 2、Yii 3，迁移成本极低。
 - **多连接支持**：一个应用可同时配置多套 Salt/Length 组合（如用户 ID 与订单 ID 使用不同盐值），通过 `connection('xxx')` 切换。
 - **无框架依赖**：不依赖任何特定框架即可独立使用，直接 `new HashidsManager($config, $factory)` 即可工作。
 - **对齐 vinkla/hashids**：Laravel 下 Facade、容器绑定、`config/hashids.php` 格式均与 vinkla/hashids 一致，可平滑替换。
-- **框架原生风格**：各框架集成遵循各自的惯用法——Laravel 用 ServiceProvider + Facade，Webman 用 Plugin + Bootstrap，ThinkPHP 用 Service，Hyperf 用 ConfigProvider。
+- **框架原生风格**：各框架集成遵循各自的惯用法——Laravel 用 ServiceProvider + Facade，Webman 用 Plugin + Bootstrap，ThinkPHP 用 Service，Hyperf 用 ConfigProvider，Yii 2 用 Bootstrap + 应用组件，Yii 3 用 ServiceProvider。
 
 **适用场景：**
 
@@ -64,6 +64,11 @@ hashids/
 │   │   ├── ConfigProvider.php                 # 依赖映射 + 配置发布
 │   │   ├── HashidsManagerFactory.php
 │   │   └── HashidsClientFactory.php
+│   ├── Yii2/
+│   │   ├── Bootstrap.php                      # BootstrapInterface：注册 Yii::$container
+│   │   └── Component.php                      # 应用组件：Yii::$app->hashids
+│   ├── Yii3/
+│   │   └── ServiceProvider.php                # ServiceProviderInterface：返回六个定义
 │   └── config/plugin/erikwang2013/hashids/    # Webman 插件骨架（安装时拷贝到项目）
 │       ├── app.php                            # enable 开关
 │       └── bootstrap.php                      # 注册 Webman\Bootstrap
@@ -75,8 +80,9 @@ hashids/
 │   ├── HashidsFactoryTest.php
 │   ├── InstallTest.php
 │   ├── MascotTest.php                         # 项目宠物：字形对齐与问候
-│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/   # 各框架适配测试
+│   ├── Laravel/ · Webman/ · ThinkPHP/ · Hyperf/ · Yii2/ · Yii3/   # 各框架适配测试
 │   ├── Config/PluginConfigTest.php
+│   ├── Contract/                              # 真框架契约测试（CI 单独作业，见下）
 │   └── Support/FrameworkStubs.php             # 测试用的框架类替身
 ├── docs/
 │   ├── mascot.svg                             # 项目宠物「哈希迪 Hashy」
@@ -103,7 +109,7 @@ hashids/
 | 核心层 | 多连接管理与实例构建，**不依赖任何框架** | `src/HashidsManager.php`、`src/HashidsFactory.php` |
 | 底层依赖 | 实际编解码实现 | `hashids/hashids` |
 
-核心层是整个包的重心：`HashidsManager` 持有配置，`connection($name)` 按需构建并缓存连接，`__call()` 把未指定连接的方法调用转发到默认连接；`HashidsFactory::make()` 是唯一构造 `Hashids\Hashids` 的地方。四个框架的适配类加起来约 250 行（含 Facade 与两个 Hyperf 工厂）——它们只负责把内核接进各自的容器。
+核心层是整个包的重心：`HashidsManager` 持有配置，`connection($name)` 按需构建并缓存连接，`__call()` 把未指定连接的方法调用转发到默认连接；`HashidsFactory::make()` 是唯一构造 `Hashids\Hashids` 的地方。六个框架的适配类加起来约 490 行（含 Facade、两个 Hyperf 工厂与 Yii 2 的应用组件）——它们只负责把内核接进各自的容器。
 
 ## 功能设计
 
@@ -113,9 +119,9 @@ hashids/
 
 - **编解码 API**：`encode()` / `decode()` / `encodeHex()` / `decodeHex()`，经 `__call()` 落到默认连接，无需显式 `connection()`。
 - **多连接管理**：`connection('alternative')` 切换；懒加载构建，同一连接只构建一次。
-- **多框架适配**：Laravel 用 `ServiceProvider`、Webman 用 `Install` + `Bootstrap`、ThinkPHP 用 `Service`、Hyperf 用 `ConfigProvider`，各自遵循框架惯用法。
-- **容器绑定**：类名（`HashidsManager`、`HashidsFactory`、`Hashids\Hashids`）与字符串键（`'hashids'`、`'hashids.factory'`、`'hashids.connection'`）双轨绑定，四框架一致；后两个字符串键与 vinkla/hashids 同名，便于迁移。
-- **配置与发布**：四个框架结构一致，都是**扁平数组**（根级 `default` + `connections`），只有文件路径不同。
+- **多框架适配**：Laravel 用 `ServiceProvider`、Webman 用 `Install` + `Bootstrap`、ThinkPHP 用 `Service`、Hyperf 用 `ConfigProvider`、Yii 2 用 `BootstrapInterface` + 应用组件、Yii 3 用 `ServiceProviderInterface`，各自遵循框架惯用法。
+- **容器绑定**：类名（`HashidsManager`、`HashidsFactory`、`Hashids\Hashids`）与字符串键（`'hashids'`、`'hashids.factory'`、`'hashids.connection'`）双轨绑定，六框架一致；后两个字符串键与 vinkla/hashids 同名，便于迁移。
+- **配置与发布**：六个框架的配置**形状一致**，都是**扁平数组**（根级 `default` + `connections`），差别只在放哪儿——Laravel / Webman / ThinkPHP 是 `config/hashids.php`，Hyperf 是 `config/autoload/hashids.php`，Yii 2 是 `config/params.php` 里的 `params['hashids']`，Yii 3 直接传给 `ServiceProvider` 构造函数（框架不约定配置文件）。
 - **零框架依赖内核**：`new HashidsManager($config, $factory)` 即可工作，`$config` 入参容忍非数组（归一化为空数组）。
 
 ## 生命周期
@@ -124,7 +130,7 @@ hashids/
 
 | 阶段 | 发生了什么 |
 |------|-----------|
-| **安装期** | `composer require` 拉包 → Laravel 自动发现 / Webman 安装钩子拷贝插件骨架 → 加载 `salt` / `length` / `alphabet` |
+| **安装期** | `composer require` 拉包 → Laravel 自动发现 / Webman 安装钩子拷贝插件骨架 / Yii 2 在应用配置里登记 `Bootstrap` 或组件 / Yii 3 在 `ContainerConfig::withProviders()` 里登记 `ServiceProvider` → 加载 `salt` / `length` / `alphabet` |
 | **运行期** | 容器解析出 `HashidsManager` → `encode()` / `decode()` → `__call()` 转发到 `connection($name)` → **命中缓存直接复用，未命中才 `HashidsFactory::make()` 构建并写入 `$connections`** → 返回短 ID 或原数字 |
 | **卸载期** | `composer remove` 触发 `Install::uninstall()`，移除 `config/plugin/erikwang2013/hashids`；**`config/hashids.php` 会保留**，是否清理由使用者决定 |
 
@@ -141,7 +147,7 @@ composer require erikwang2013/hashids
 > 而 Composer 2 已不再打印 suggest —— 于是在精简镜像（如 `php:8.3-fpm-alpine`）上安装期毫无提示、运行期才炸，
 > 且每个用到 Hashids 的请求都会 500。本包 `composer.json` 的 `suggest` 已补上这两个键，但仍需你确认扩展已启用。
 
-## 配置结构（Laravel / Webman / ThinkPHP）
+## 配置结构（Laravel / Webman / ThinkPHP / Yii 2 / Yii 3）
 
 与仓库 `config/hashids.php` 一致：
 
@@ -149,6 +155,10 @@ composer require erikwang2013/hashids
 - `connections`：连接名 => `salt`、`length`、可选 `alphabet`。
 
 > **Hyperf** 的配置文件路径不同（`config/autoload/hashids.php`），但结构相同，见下文 Hyperf 小节。
+>
+> **Yii 2** 不用单独的配置文件，直接把同一个数组放进应用 `config/params.php` 的 `params['hashids']`，见下文 Yii 2 小节。
+>
+> **Yii 3** 也不读配置文件，把同一个数组传给 `ServiceProvider` 构造函数即可，见下文 Yii 3 小节。
 
 ## 无框架用法
 
@@ -413,7 +423,140 @@ $manager = \Hyperf\Context\ApplicationContext::getContainer()->get(
 );
 ```
 
-四个框架的配置结构一致（根级 `default` + `connections`），只有文件路径不同：Hyperf 用 **`config/autoload/hashids.php`**，Laravel / Webman / ThinkPHP 用 **`config/hashids.php`**。
+六个框架的配置**结构一致**（根级 `default` + `connections`），差别只在放哪儿：Hyperf 用 **`config/autoload/hashids.php`**，Laravel / Webman / ThinkPHP 用 **`config/hashids.php`**，Yii 2 放进 **`config/params.php` 的 `params['hashids']`**，Yii 3 直接传给 `ServiceProvider`。
+
+---
+
+## Yii 2
+
+适配器实现 **`yii\base\BootstrapInterface`**，把六个标识注册进 `Yii::$container`；另提供 **`yii\base\Component`** 子类，让 Yii 惯用的 `Yii::$app->hashids` 可用。
+
+### 两种入口，按需选（不能互相替代）
+
+**入口 A：容器 —— `config/web.php` 的 `bootstrap` 数组**
+
+```php
+'bootstrap' => [
+    'log',
+    \Erikwang2013\Hashids\Yii2\Bootstrap::class,
+],
+```
+
+```php
+use Erikwang2013\Hashids\HashidsManager;
+
+$manager = Yii::$container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);
+$alt     = Yii::$container->get('hashids')->connection('alternative')->encode(100);
+```
+
+**入口 B：应用组件 —— `config/web.php` 的 `components` 数组**
+
+```php
+'components' => [
+    'hashids' => [
+        'class'  => \Erikwang2013\Hashids\Yii2\Component::class,
+        'config' => [
+            'default'     => 'main',
+            'connections' => [
+                'main' => ['salt' => getenv('HASHIDS_SALT'), 'length' => 6],
+            ],
+        ],
+    ],
+],
+```
+
+```php
+Yii::$app->hashids->encode(1);                              // __call 转默认连接
+Yii::$app->hashids->connection('alternative')->encode(100); // 切连接
+Yii::$app->hashids->manager;                                // 取底层 HashidsManager
+```
+
+> **为什么两种入口都要有**：`yii\di\ServiceLocator::get()` **不会**回落到 `Yii::$container`，
+> 只认登记在自己 `_definitions` 里的组件。所以只登记 `bootstrap` 并不会让 `Yii::$app->hashids`
+> 生效；反过来只配 `components` 也不会让 `Yii::$container->get()` 拿到实例。要用哪个就配哪个。
+
+### 配置文件
+
+Yii 2 没有 `config/hashids.php` 这种约定，配置放在应用 **`config/params.php`** 的 `params['hashids']`：
+
+```php
+return [
+    // ...
+    'hashids' => [
+        'default'     => 'main',
+        'connections' => [
+            'main' => [
+                // Yii 2 没有 Laravel 那样的全局 env() 助手，用 getenv()
+                // 或你自己应用里的 env 机制。
+                'salt'   => getenv('HASHIDS_SALT') ?: '',
+                'length' => (int) (getenv('HASHIDS_LENGTH') ?: 0),
+            ],
+        ],
+    ],
+];
+```
+
+`Bootstrap` 读的就是 `Yii::$app->params['hashids']`；该键缺失时按空数组处理（默认连接名回落
+`main`），不报错 —— 但缺 salt 时哈希可枚举，上线前请确认盐已设置。
+
+> **默认连接是惰性解析的**：`bootstrap` 阶段只登记定义，真正取 `Hashids\Hashids` 时才构建连接。
+> 配置写错不会让整个应用启动失败，而是在取用时抛 `InvalidArgumentException`。
+
+Yii 2 集成继承 `yii\base\BootstrapInterface` / `yii\base\Component`，需在 **`yiisoft/yii2`**
+环境中使用（本包列为 suggest）。
+
+---
+
+## Yii 3
+
+Yii 3 是一组 PSR-11 容器（`yiisoft/di`）装配起来的包，没有 Yii 2 那种应用配置数组。
+适配器是一个实现 **`Yiisoft\Di\ServiceProviderInterface`** 的类，`getDefinitions()` 返回六个容器标识。
+
+**注册**
+
+```php
+use Erikwang2013\Hashids\Yii3\ServiceProvider;
+use Yiisoft\Di\Container;
+use Yiisoft\Di\ContainerConfig;
+
+$config = ContainerConfig::create()
+    ->withProviders([
+        // 配置直接传给 provider —— Yii 3 不约定配置文件位置，
+        // 值从哪来（params、env、配置中心）由应用自己决定。
+        new ServiceProvider($params['hashids'] ?? []),
+    ]);
+
+$container = new Container($config);
+```
+
+**使用**
+
+```php
+use Erikwang2013\Hashids\HashidsFactory;
+use Erikwang2013\Hashids\HashidsManager;
+use Hashids\Hashids;
+
+$manager = $container->get(HashidsManager::class);
+$hash    = $manager->encode(10, 20);                                  // 默认连接
+
+$container->get('hashids')->connection('alternative')->encode(100);   // 字符串别名 + 切连接
+$container->get(Hashids::class)->encode(1);                           // 按类名取默认连接
+$container->get(HashidsFactory::class);                               // 工厂
+```
+
+容器自带单例语义（同一个 id 每次 `get()` 返回同一实例），所以别名与 FQCN 拿到的是同一套连接，
+适配器的定义只要转发即可，不必预先造对象。
+
+> **报错类名会多包一层**：默认连接是惰性解析的，装配阶段不会失败；但取用时容器会把本包的
+> `InvalidArgumentException` 包进 **`Yiisoft\Di\BuildingException`** 抛出 —— `catch` 里写
+> `InvalidArgumentException` 是接不住的，要看 `$e->getPrevious()`。
+
+> **provider 的定义优先于普通 definitions**：真容器的装配顺序是先 `definitions`、后 `providers`，
+> 所以想覆盖 hashids 的绑定，改 `definitions` 里的同名键**无效**，要用 `extensions` 或改 provider。
+
+Yii 3 集成实现 `Yiisoft\Di\ServiceProviderInterface`，需在 **`yiisoft/di`** 环境中使用
+（本包列为 suggest）。
 
 ---
 
