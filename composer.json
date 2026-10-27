@@ -1,6 +1,7 @@
 {
     "name": "erikwang2013/hashids",
     "description": "Hashids integration for Laravel, Webman, ThinkPHP, Hyperf, Yii 2, and Yii 3 (multi-connection, API aligned with vinkla/hashids).",
+    "homepage": "https://package.erik.xyz/hashids/",
     "keywords": [
         "hashids",
         "laravel",
