@@ -4,7 +4,7 @@
 
   <defs>
     <style>
-      text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "PingFang SC", "Microsoft YaHei", monospace; }
+      text { font-family: ui-monospace, "Noto Sans Mono", "DejaVu Sans Mono", "Liberation Mono", monospace; }
       .bg     { fill: #ffffff; }
       .card   { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
       .spine  { stroke: #cbd5e1; stroke-width: 1.5; fill: none; }

@@ -4,7 +4,7 @@
 
   <defs>
     <style>
-      text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "PingFang SC", "Microsoft YaHei", monospace; }
+      text { font-family: ui-monospace, "Noto Sans Mono", "DejaVu Sans Mono", "Liberation Mono", monospace; }
       .bg         { fill: #ffffff; }
       .lane       { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; }
       .lane-title { fill: #94a3b8; font-size: 10px; letter-spacing: 1.2px; }
