@@ -78,10 +78,12 @@ jobs:
           coverage: none
           tools: composer:v2
 
+      # testbench ^9 拉取 Laravel 11，而 Laravel 11 已受安全公告影响，Composer
+      # 会直接拒绝安装；^10 对应 Laravel 12。
       - name: Install Laravel test harness
         run: >
           composer require --dev --no-interaction --with-all-dependencies
-          orchestra/testbench:^9.0
+          orchestra/testbench:^10.0
 
       - name: Show resolved versions
         run: composer show --direct

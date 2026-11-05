@@ -25,7 +25,7 @@ foreach (['Illuminate\Foundation\Application', 'Orchestra\Testbench\TestCase'] a
         fwrite(STDERR, sprintf(
             "Laravel 契约测试需要 [%s]，当前 vendor 里没有。\n" .
             "CI 由 contract-laravel 作业安装；本地请执行：\n" .
-            "  composer require --dev --with-all-dependencies orchestra/testbench:^9.0\n" .
+            "  composer require --dev --with-all-dependencies orchestra/testbench:^10.0\n" .
             "注意不要与 workerman/webman-framework 同时安装（全局 base_path() 会冲突）。\n",
             $symbol
         ));
